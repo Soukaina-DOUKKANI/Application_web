@@ -33,7 +33,7 @@ export default function Details_procedures({match}){
                 <tr>
                    <th>NOM DE LA PROCEDURE</th> 
                    <td>
-                    <input name="procédure" type="text" placeholder="Renommer" ref={register}/>  
+                    <input name="procedure" autocomplete="off"  type="text" placeholder="Renommer" ref={register}/>  
                    </td>
                 </tr>
                 <tr>
@@ -68,7 +68,7 @@ export default function Details_procedures({match}){
                             return (
                                 <p>
                                 <span className="span" >{item.PARAMETER_NAME}</span>
-                                <span className="span"><input name="parameter1" type="text" placeholder="Renommer" ref={register}/></span>
+                                <span className="span"><input name={item.PARAMETER_NAME} autocomplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
                                  </p>
                                      
                             );}
@@ -76,9 +76,11 @@ export default function Details_procedures({match}){
                                 return(
                                  <div >
                                  <span className="span" >{item.PARAMETER_NAME}</span>
-                                  <span className="span" ><input className="input" name="parameter2" type="text" placeholder="Renommer" ref={register}/></span>
+                                  <span className="span" ><input className="input" autocomplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
+                                  <p className="p" ><input autoComplete='off' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
+                                  OU
                                   <p className="p">
-                                  <textarea  className="textarea" placeholder="Requête" name="request" type="text" ref={register}></textarea>
+                                  <textarea  className="textarea" autocomplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
                                   </p>
                                   </div>
                                       );

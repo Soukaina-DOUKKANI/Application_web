@@ -3,6 +3,7 @@ const port = 4000
 // creation de l'app web 
 var app = express();
 var sql = require('mssql');
+var moment= require('moment');
 app.use(express.json())
 app.use(function(req,res,next){
     res.header('Access-Control-Allow-Origin', '*');
@@ -86,10 +87,6 @@ app.get('/page1/:name', function (req, res) {
                         res.send(obj_res);
                     }
                 })
-
-
-                
-
             }
         });
 
@@ -99,19 +96,41 @@ app.get('/page1/:name', function (req, res) {
 app.post('/set_data/:name', function(req,res){
     var name =req.params.name;
     const request=new sql.Request();
-    request.input('procédure', sql.Text, req.body.procédure)
-    request.input('param1', sql.Text, req.body.parameter1)
-    request.input('param2', sql.Text, req.body.parameter2)
-    request.input('request', sql.Text, req.body.request)
-
-    request.query(`INSERT INTO [Valeur_Ajuste] (nom_procedure_initale,procédure, param1,  param2, request) 
-                    VALUES  ('${name}', @procédure, @param1,  @param2,  @request)`, function(err, result) {
+    request.input('data', sql.Text, JSON.stringify(req.body))
+    
+    request.query(`select * from Valeur_Ajuste where procedureName='${name}'`, function(err, result) {
         if(err){
-            return (err);
             console.log(err);
+            return (err);
+            
         }
         else {
-            res.send('success'); 
+            if (!result.recordset.length){
+                request.query( `insert into Valeur_Ajuste (procedureName,formdata) values ( '${name}', @data)`, function (err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, insert')
+                    }
+
+                })
+            }
+            else{
+                request.query(`UPDATE Valeur_Ajuste SET procedureName='${name}', formdata=@data 
+                where procedureName='${name}'` , function(err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, update ')
+                    }
+
+                })
+            }
+            
         }
         });
 
@@ -122,22 +141,67 @@ app.post('/set_data/:name', function(req,res){
 app.get('/Get_values/:proc', function (req,res){
     const request= new sql.Request();
     var proc =req.params.proc;
-    request.query(`select nom_procedure_initale AS NOM_INITIAL,
-                    procédure AS NOM_PROCEDURE,
-                    param1 as PARAMETRE1,
-                    param2 as PARAMETRE2
-                    from Valeur_Ajuste
-                    where nom_procedure_initale like'${proc}' ` , function(err,values){
+    request.query(`select formdata  from Valeur_Ajuste
+                    where procedureName='${proc}' ` , function(err,values){
         if (err){
             console.log(err);
             }
         else{
-            res.send(values.recordset);
+            const result= JSON.parse(values.recordset[0].formdata)
+            res.send(result);
             }
         });
     
 })
 
+app.get ('/Get_options/:requete', function(req, res){
+    const request= new sql.Request();
+    const requete=req.params.requete;
+    request.query(requete, function(err, result){
+        if(err){
+            console.log(err);
+            return(err);
+        }
+        else{
+            res.send(result.recordset);
+        }
+    })
+})
 
+app.post('/set_procedure', function(req,res){
+    const request=new sql.Request();
+    let query_ = 'Execute';
+    request.input('procedure', sql.VarChar, req.body.nameProc);
+    query_ += ' @procedure'; 
+    
+    for (let i in req.body){
+        if (i.toLowerCase()=='@date_in'){
+            request.input('date', sql.Date, moment(req.body[i]).format('yyyy-MM-DD'));
+
+            query_+= ' @date';
+
+        }
+    }
+    for (let i in req.body){
+        if (i.toLowerCase()=='@titre'){
+            request.input('valeur', sql.VarChar, req.body[i])
+            query_ += ' @valeur'
+            
+
+        }
+    }
+   
+    request.query(query_, function(err, result){
+        if(err){
+            console.log(err);
+        }
+        else{
+
+            res.send(result.recordset);
+        }
+    })
+
+    
+})
     
 app.listen(port,  () => console.log(`server is running app on port ${port}`));
