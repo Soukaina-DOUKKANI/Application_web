@@ -1,5 +1,6 @@
-import React ,{ useState, useEffect }  from 'react';
-import Axios from 'axios';
+import React ,{ useState, useEffect, useContext }  from 'react';
+import {LoginContext} from './LoginContext';
+import Axios from './AxiosInstance'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/Design.css";  
 import Parametre from "./Parametre";
@@ -11,25 +12,30 @@ export default function Interface_utilisateur({match}){
     const [data, setData]= useState({});
     const [dataGraph, setDataGraph]= useState([]);
     const {control, setValue, register, handleSubmit}=useForm();
+    const [user,setUser]=useContext(LoginContext);
+
 
     const onSubmit =(df)=>{
        
-        Axios.post(`http://localhost:4000/set_procedure`, df)
+        Axios(setUser).post(`http://localhost:4000/set_procedure`, df)
         .then (result => setDataGraph(result.data))
+        .catch(err => console.log(err));  
         console.log(df)
     }
 
     useEffect(() => {  
-        Axios.get(`http://localhost:4000/Get_values/${match.params.proc}`).then(result => setData(result.data));  
+        Axios(setUser).get(`http://localhost:4000/Get_values/${match.params.proc}`).then(result => setData(result.data))
+        .catch(err => console.log(err));  
+        
     }, []); 
     console.log(data)
 
     
      
     return (
-       <div> 
+       <div className="container"> 
         <form onSubmit={handleSubmit(onSubmit)}>
-            <div  className="container">
+            <div  >
             {
                 
                 Object.keys(data).map((key ) =>{
@@ -37,15 +43,15 @@ export default function Interface_utilisateur({match}){
                         return (
                             
                             <div >
-                            <h2 > La procédure {data[key]}  </h2>
+                            <h2 > {data[key]}  </h2>
                             <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
                             </div> 
                             )
                     }
                     if (key.charAt(0)=="@"){
                         return(
-                            <div className="row" > 
-                                <span style={{"marginRight": "10px"}}>{data[key]} </span>  
+                            <div className="row"  > 
+                                <span style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </span>  
                                 <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
                             </div>)
                     } 

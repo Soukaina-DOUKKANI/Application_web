@@ -1,9 +1,12 @@
-import React, { useState, useEffect , useRef } from 'react'  
-import Axios from 'axios';  
+import React, { useState, useEffect , useRef, useContext } from 'react'  
+import Axios from './AxiosInstance';  
 import 'bootstrap/dist/css/bootstrap.min.css' 
 import {Link} from "react-router-dom"
+import {LoginContext} from './LoginContext';
+ 
 
 export default function List_procedures(){
+    const [user,setUser]=useContext(LoginContext);
     const [display, setDisplay]= useState(false);
     const [data, setData] = useState([]);  
     const [search, setSearch]=useState("");
@@ -32,7 +35,8 @@ export default function List_procedures(){
     }
   
     useEffect(() => {  
-        Axios.get("http://localhost:4000/app").then(result => setData(result.data));  
+        Axios(setUser).get("http://localhost:4000/app").then(result => setData(result.data))
+        .catch(err => console.log(err));  
     }, []);  
 
     
@@ -53,11 +57,26 @@ export default function List_procedures(){
                     {data
                     .filter(({P})=>P.toLowerCase().indexOf(search.toLowerCase())>-1)
                     .map(item =>{
-                        return (
-                            <div  onClick={()=> setResult(item.P)}>
-                            <Link to={`/Details_procedure/${item.P}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.P}</Link>
-                            </div>
-            )})}</div>
+                        if(user.role=='admin'){
+                            return (
+                                <div  onClick={()=> setResult(item.P)}>
+                                <Link to={`/Details_procedure/${item.P}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.P}</Link>
+                                </div>
+                            )
+                            
+                        }
+                        else{
+                            return (
+                                <div  onClick={()=> setResult(item.P)}>
+                                <Link to={`/Interface_utilisateur/${item.P}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.P}</Link>
+                                </div>
+                            )
+
+                        }
+                        
+                })
+                }
+                </div>
             )}
         </div>
         </div>

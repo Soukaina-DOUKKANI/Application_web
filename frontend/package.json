@@ -9,6 +9,8 @@
     "bootstrap": "^4.6.0",
     "c3": "^0.7.20",
     "d3": "^6.6.1",
+    "generate-password": "^1.6.0",
+    "history": "^5.0.0",
     "moment": "^2.29.1",
     "react": "^17.0.1",
     "react-alert": "^7.0.2",

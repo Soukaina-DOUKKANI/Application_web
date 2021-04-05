@@ -4,13 +4,23 @@ const port = 4000
 var app = express();
 var sql = require('mssql');
 var moment= require('moment');
+var jwt= require('jsonwebtoken');
+var bcrypt= require('bcrypt');
+
 app.use(express.json())
+
+var cors = require('cors');    
+app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
+
+/*
 app.use(function(req,res,next){
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin');
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-    res.header('Access-Control-Allow-Headers', '*');
+    res.header('Access-Control-Allow-Headers', '*')
   next();
 })
+*/
+
 // configuration de la BDD SQL SERVER 
 var config = {
     server: "localhost\\MSSQLSERVER",
@@ -30,19 +40,207 @@ sql.connect(config, function (err) {
         console.log(err);
         return;
     }
+
+// Enregistrement des comptes Utilisateurs
+app.post('/users', function(req,res){
+    const request= new sql.Request();
+    const id=req.body.id;
+    const utilisateur= req.body.utilisateur;
+    const identifiant= req.body.identifiant;
+    const pwd = req.body.pwd;
+
+    bcrypt.hash(pwd, 12, function (err, hash){
+        if(err){
+            console.log(err);
+            return err;
+
+        }
+        else{
+
+            request.input("id", sql.Int, id);
+            request.input("utilisateur", sql.Text, utilisateur);
+            request.input("identifiant", sql.Text, identifiant);
+            request.input("pwd", sql.Text, pwd );
+            request.input("hash", sql.Text, hash);
+
+            request.query(`select * from Users where ID=@id   `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role) values ( @utilisateur, @identifiant, @pwd, @hash, 'user')`, function (err, insert){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert user')
+                            }
+
+                        })
+                    }
+                    else{
+                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user'
+                        where ID=@id ` , function(err, update){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update user ')
+                    }
+
+                })
+            }
+            
+        }
+        });
+
+    }
+});
+    
+    
+})
+
+//Connexion 
+app.post('/connexion', function (req,res) {
+    var request=new sql.Request();
+    const identifiant= req.body.identifiant;
+    const pwd=req.body.pwd;
+    
+    console.log(req.body)    
+    request.input('identifiant', sql.Text, identifiant);
+    request.input('pwd', sql.Text, pwd);
+
+    request.query('select * from Users where identifiant like @identifiant and pwd like @pwd ', function(err, result){
+        if(err){
+            console.log(err);
+            return err;
+        }
+        
+        else{
+            if(result.recordset.length > 0){
+                bcrypt.compare(pwd, result.recordset[0].hash ,  (error, response)=>{
+                    console.log(response)
+                    if (response){
+                        const {id, role}= result.recordset[0];
+                        const token= jwt.sign({id , role}, "jwtSecret", {expiresIn: 60})
+                        res.json( { auth: true, token:token , response: {id, role}})
+
+                    }
+                    else{
+                        res.json({auth: false, message: 'wrong pwd'})
+                    }
+
+                })
+                
+            }
+            else{
+                res.json({auth: false, message: 'wrong pwd/id combination'})
+
+            }
+        }    
+    });    
+});
+
+
+//verifyJWT middleware
+
+const verifyJwt = (req,res,next) =>{
+    const token = req.headers.authorization;
+
+    if (!token ){
+        res.status(403).send('forbidden')
+    }
+    else{
+        jwt.verify(token, "jwtSecret", (err, decoded)=>{
+            if (err){
+                console.log(err)
+                res.status(403).send('token expired')
+            }
+            else{
+                
+                req.userId = decoded.id;
+                req.roleUser=decoded.role;
+                next();
+                
+                
+            }
+        })
+
+    }
+
+}
+
+app.use(verifyJwt)
+
+//Validate connexion
+app.get('/IsConnected', function(req,res){
+     res.send({isLoggedIn: true, role:req.roleUser})
+})
+
+
+//check Identifiant
+app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
+    const identifiant= req.params.identifiant
+    const id= req.params.id
+    const request=new sql.Request();
+    
+    request.input('identifiant', sql.Text, identifiant)
+    request.input('id', sql.Int, id)
+
+    request.query('select identifiant from Users where identifiant like @identifiant and id!=@id ', function(err, result) {
+
+        if (err){
+            console.log(err)
+            return err
+
+        }
+        else{
+            if(result.recordset.length){
+                res.send('abort')
+            }
+            else{
+                res.send('proceed')
+            }
+        }
+    })
+})
+
+// affichage des metadata des PS
 app.get('/app', function (req, res) {
         // creation de la requete SQL
-        var req = new sql.Request();
+        var request = new sql.Request();
+        const role=req.roleUser;
+        const id= req.userId;
        // liste des  procedures stockees
-        req.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, results){
+       if(role=='admin'){
+            request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, results){
+                if (err) console.log(err)
+
+                // afficher le resultat de la procedure 
+                res.send(results.recordset);
+            });
+
+       }
+       else{
+        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE  SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN'  ", function (err, results){
             if (err) console.log(err)
 
             // afficher le resultat de la procedure 
             res.send(results.recordset);
         });
+
+       }
+        
         
     });
 });
+
+//liste des procedures stockees
 
 app.get('/page1/:name', function (req, res) {
        // liste des  procedures stockees
@@ -90,9 +288,9 @@ app.get('/page1/:name', function (req, res) {
             }
         });
 
-    });
+});
 
-
+//interface user 
 app.post('/set_data/:name', function(req,res){
     var name =req.params.name;
     const request=new sql.Request();
@@ -135,9 +333,9 @@ app.post('/set_data/:name', function(req,res){
         });
 
 
-    });
+});
 
-
+//affichage interface user
 app.get('/Get_values/:proc', function (req,res){
     const request= new sql.Request();
     var proc =req.params.proc;
@@ -154,6 +352,7 @@ app.get('/Get_values/:proc', function (req,res){
     
 })
 
+//execution requete de la liste box
 app.get ('/Get_options/:requete', function(req, res){
     const request= new sql.Request();
     const requete=req.params.requete;
@@ -168,6 +367,7 @@ app.get ('/Get_options/:requete', function(req, res){
     })
 })
 
+//Execution de la procedure stockee
 app.post('/set_procedure', function(req,res){
     const request=new sql.Request();
     let query_ = 'Execute';

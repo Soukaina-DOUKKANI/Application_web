@@ -1,22 +1,27 @@
-import React, { useState, useEffect } from 'react' ; 
-import Axios from 'axios';  
+import React, { useState, useEffect , useContext } from 'react' ; 
+import {LoginContext} from './LoginContext';
+import Axios from './AxiosInstance'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/Design.css";
 import {useForm} from "react-hook-form";
-import {Link} from 'react-router-dom';
 
 export default function Details_procedures({match}){
     const {register, handleSubmit}= useForm();
     const [data, setData] = useState({parameters : []});  
+    const [user,setUser]=useContext(LoginContext);
+
   
     useEffect(() => {  
-        Axios.get(`http://localhost:4000/page1/${match.params.name}`).then(result => setData(result.data));  
+        Axios(setUser).get(`http://localhost:4000/page1/${match.params.name}`).then(result => setData(result.data))
+        .catch(err => console.log(err));  
+          
     }, []); 
     
     
     const onSubmit = (formData)=>{
-        Axios.post(`http://localhost:4000/set_data/${match.params.name}`, formData)
+        Axios(setUser).post(`http://localhost:4000/set_data/${match.params.name}`, formData)
         .then (result => console.log(result))
+        .catch(err => console.log(err));  
         console.log(JSON.stringify(formData))
 
     }
@@ -33,7 +38,7 @@ export default function Details_procedures({match}){
                 <tr>
                    <th>NOM DE LA PROCEDURE</th> 
                    <td>
-                    <input name="procedure" autocomplete="off"  type="text" placeholder="Renommer" ref={register}/>  
+                    <input name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
                    </td>
                 </tr>
                 <tr>
@@ -57,7 +62,7 @@ export default function Details_procedures({match}){
                    <td>{data.CREATE_DATE}</td>
                 </tr>
                 <tr>
-                   <th>DATE DE MODIDIFCATION</th> 
+                   <th>DATE DE MODIFICATION</th> 
                    <td>{data.MODIFY_DATE}</td>
                 </tr>
                 <tr>
@@ -68,7 +73,7 @@ export default function Details_procedures({match}){
                             return (
                                 <p>
                                 <span className="span" >{item.PARAMETER_NAME}</span>
-                                <span className="span"><input name={item.PARAMETER_NAME} autocomplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
+                                <span className="span"><input name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
                                  </p>
                                      
                             );}
@@ -76,11 +81,11 @@ export default function Details_procedures({match}){
                                 return(
                                  <div >
                                  <span className="span" >{item.PARAMETER_NAME}</span>
-                                  <span className="span" ><input className="input" autocomplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
-                                  <p className="p" ><input autoComplete='off' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
+                                  <span className="span" ><input className="input" autoComplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
+                                  <p className="p" ><input autoComplete='OFF' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
                                   OU
                                   <p className="p">
-                                  <textarea  className="textarea" autocomplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
+                                  <textarea  className="textarea" autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
                                   </p>
                                   </div>
                                       );
@@ -91,11 +96,8 @@ export default function Details_procedures({match}){
                    
             </tbody>
            </table> 
-            <div className="div"> 
-            <button  className="button" type="submit"> Enregistrer</button>
-            <Link to= {`/Interface_utilisateur/${data.SP_NAME} `}> 
-                <button className="button2" > Interface utilisateur</button> 
-            </Link>
+            <div className="div" > 
+            <button onClick={()=> alert('Operation reussie')} className="button" type="submit"> Enregistrer</button>
             </div>
         </form>   
         </div>  

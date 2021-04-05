@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
-import Axios from 'axios';
+import {LoginContext} from './LoginContext';
+import Axios from './AxiosInstance'; 
 import { Controller} from "react-hook-form";
 
 
@@ -11,11 +12,16 @@ export default function  Parametre({type, valeur, requete, register, control, se
     const isValue=(valeur!=="")? true : false;
     const [values, setValues]=useState([]);
     const [selectedDate, setSelectedDate]=useState(null);
+    const [user,setUser]=useContext(LoginContext);
+
 
 
     useEffect(() => {  
         if (!isDate && !isValue){
-            Axios.get(`http://localhost:4000/Get_options/${requete}`).then(result => setValues(result.data));
+            Axios(setUser).get(`http://localhost:4000/Get_options/${requete}`)
+            .then(result => setValues(result.data))
+            .catch(err => console.log(err));  
+
         }  
     }, []);
     
