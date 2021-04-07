@@ -28,19 +28,19 @@ export default function Login(){
  
     }
 
-
-        
     return(
         <div className="container">
-            <h1  className="center"> Connexion</h1>
+            <h1 > Connexion</h1>
             <form onSubmit= {handleSubmit(onSubmit)}>
-               <div className="form-group" class="col-md-6">
+               <div className="form-group" class="col-md-6" >
                    <div>
-                   <input class="form-control" autoComplete='off' placeholder='Identifiant' name='identifiant'type="text" ref={register({ required: true })}/>
+                   <label  for ="id">Identifiant</label>
+                   <input id='id' class="form-control" autoComplete='off' placeholder='Saisir un identifiant' name='identifiant'type="text" ref={register({ required: true })}/>
                    
                    </div>
                  <div className="form-group">
-                 <input class="form-control" autoComplete='off' placeholder='Mot de passe' name='pwd' type="password" ref={register({ required: true })}/> 
+                 <label  for ="pwd">Mot de passe</label>
+                 <input class="form-control" autoComplete='off' placeholder='Saisir un mot de passe' name='pwd' type="password" ref={register({ required: true })}/> 
 
                  </div>
                 <div>

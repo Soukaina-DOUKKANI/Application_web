@@ -1,18 +1,21 @@
 import React ,{ useState, useEffect, useContext }  from 'react';
-import {LoginContext} from './LoginContext';
 import Axios from './AxiosInstance'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "./styles/Design.css";  
+import "./styles/Design.css"; 
+import {LoginContext} from './LoginContext';
 import Parametre from "./Parametre";
 import {useForm} from "react-hook-form";
 import Graphe  from './Graphe';
 import 'c3/c3.css';
+import {ExportToExcel} from './ExportToExcel';
 
 export default function Interface_utilisateur({match}){
+
     const [data, setData]= useState({});
     const [dataGraph, setDataGraph]= useState([]);
     const {control, setValue, register, handleSubmit}=useForm();
     const [user,setUser]=useContext(LoginContext);
+    const fileName = "Data";
 
 
     const onSubmit =(df)=>{
@@ -20,16 +23,18 @@ export default function Interface_utilisateur({match}){
         Axios(setUser).post(`http://localhost:4000/set_procedure`, df)
         .then (result => setDataGraph(result.data))
         .catch(err => console.log(err));  
-        console.log(df)
     }
 
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/Get_values/${match.params.proc}`).then(result => setData(result.data))
+        Axios(setUser).get(`http://localhost:4000/Get_values/${match.params.proc}`)
+        .then(result => setData(result.data))
         .catch(err => console.log(err));  
         
     }, []); 
-    console.log(data)
 
+    console.log(dataGraph)
+
+    
     
      
     return (
@@ -66,12 +71,18 @@ export default function Interface_utilisateur({match}){
 
         </form>
          <div className="container" style= {{"margin-top": "30px "}}>
-         <Graphe data={dataGraph} />
-     </div>
-     </div>
+         <Graphe data={dataGraph} procedure={match.params.proc}  />
+    </div>
+    <div>
+      {
+
+        (dataGraph.length>0 &&  <ExportToExcel apiData={dataGraph} fileName={fileName} />) 
+      }
+    </div>
+    
+    </div>
         
-        
-        )
+    )
 
     
     

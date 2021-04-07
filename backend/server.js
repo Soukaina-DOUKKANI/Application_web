@@ -12,14 +12,6 @@ app.use(express.json())
 var cors = require('cors');    
 app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
 
-/*
-app.use(function(req,res,next){
-    res.header('Access-Control-Allow-Origin');
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-    res.header('Access-Control-Allow-Headers', '*')
-  next();
-})
-*/
 
 // configuration de la BDD SQL SERVER 
 var config = {
@@ -111,7 +103,6 @@ app.post('/connexion', function (req,res) {
     const identifiant= req.body.identifiant;
     const pwd=req.body.pwd;
     
-    console.log(req.body)    
     request.input('identifiant', sql.Text, identifiant);
     request.input('pwd', sql.Text, pwd);
 
@@ -124,10 +115,9 @@ app.post('/connexion', function (req,res) {
         else{
             if(result.recordset.length > 0){
                 bcrypt.compare(pwd, result.recordset[0].hash ,  (error, response)=>{
-                    console.log(response)
                     if (response){
                         const {id, role}= result.recordset[0];
-                        const token= jwt.sign({id , role}, "jwtSecret", {expiresIn: 60})
+                        const token= jwt.sign({id , role}, "jwtSecret", {expiresIn: 60*60*4})
                         res.json( { auth: true, token:token , response: {id, role}})
 
                     }
@@ -227,7 +217,7 @@ app.get('/app', function (req, res) {
 
        }
        else{
-        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE  SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN'  ", function (err, results){
+        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE  SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN' ", function (err, results){
             if (err) console.log(err)
 
             // afficher le resultat de la procedure 
@@ -385,7 +375,7 @@ app.post('/set_procedure', function(req,res){
     for (let i in req.body){
         if (i.toLowerCase()=='@titre'){
             request.input('valeur', sql.VarChar, req.body[i])
-            query_ += ' @valeur'
+            query_ += ' ,@valeur'
             
 
         }
@@ -396,12 +386,70 @@ app.post('/set_procedure', function(req,res){
             console.log(err);
         }
         else{
-
             res.send(result.recordset);
         }
     })
 
     
 })
+
+app.post('/setGraph/:proc', function(req,res){
+    const request=new sql.Request();
+    const proc=req.params.proc;
+    request.input('dataGraph', sql.Text, JSON.stringify(req.body))
     
+    request.query(`select * from Data_Graph where procedureName like '${proc}'  `, function(err, result) {
+        if(err){
+            console.log(err);
+            return (err);
+            
+        }
+        else {
+            if (!result.recordset.length){
+                request.query( `insert into Data_Graph (procedureName, dataGraph) values ('${proc}',@dataGraph)`, function (err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, insert graph')
+                    }
+
+                })
+            }
+            else{
+                request.query(`UPDATE Data_Graph SET procedureName='${proc}', dataGraph=@dataGraph
+                where procedureName like '${proc}'` , function(err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, update graph ')
+                    }
+
+                })
+            }
+            
+        }
+        });
+
+
+});
+
+app.get('/getGraph/:name',function(req,res){
+    const request= new sql.Request();
+    const name=req.params.name;
+    request.query(`select dataGraph from Data_Graph where procedureName like '${name}' `, function(err,result){
+        if(err){
+            console.log(err);
+            return(err);
+        }
+        else{
+            const resGraph= JSON.parse(result.recordset[0].dataGraph)
+            res.send(resGraph);
+        }
+    })
+})
+
 app.listen(port,  () => console.log(`server is running app on port ${port}`));

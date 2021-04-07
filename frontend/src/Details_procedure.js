@@ -4,6 +4,7 @@ import Axios from './AxiosInstance';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./styles/Design.css";
 import {useForm} from "react-hook-form";
+import {Link} from 'react-router-dom';
 
 export default function Details_procedures({match}){
     const {register, handleSubmit}= useForm();
@@ -28,7 +29,7 @@ export default function Details_procedures({match}){
     return(
         <div className="container-fluid">
             <div className="row">
-            <h2 className="h2" > Détails de la procédure {data.SP_NAME} </h2>
+            <h2 className="h2" > La procédure {data.SP_NAME} </h2>
             
             
         <form   className="container-fluid" onSubmit={handleSubmit(onSubmit)}> 
@@ -88,7 +89,7 @@ export default function Details_procedures({match}){
                                   <textarea  className="textarea" autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
                                   </p>
                                   </div>
-                                      );
+                                );
                             }
                        })}</td>
                 </tr>
@@ -97,8 +98,12 @@ export default function Details_procedures({match}){
             </tbody>
            </table> 
             <div className="div" > 
-            <button onClick={()=> alert('Operation reussie')} className="button" type="submit"> Enregistrer</button>
+            <button onClick={()=> alert('Opération réussie')} className="button" type="submit"> Enregistrer</button>
+            <Link to= {`/GrapheParametres/${data.SP_NAME} `}> 
+                <button className="button2" > Paramétrer le graphe</button> 
+            </Link>
             </div>
+           
         </form>   
         </div>  
         </div>

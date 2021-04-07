@@ -21,9 +21,9 @@ export default function Header(){
                 <nav className= "navbar navbar-expand-sm bg-dark navbar-dark">
                     <ul className="navbar-nav  ">
                         <li className= "nav-item active">
-                            <Link to="/" className="nav-link" > Home page</Link>
+                            <Link to="/" className="nav-link" > Accueil</Link>
                             <Link to="/Utilisateurs" className="nav-link" > Utilisateurs</Link>
-                            <Link to="/Login" onClick={Logout} className="nav-link" > Logout</Link>
+                            <Link to="/Login" onClick={Logout} className="nav-link" > Déconnexion</Link>
 
                         </li>
                         
@@ -38,8 +38,8 @@ export default function Header(){
                 <nav className= "navbar navbar-expand-sm bg-dark navbar-dark">
                     <ul className="navbar-nav  ">
                         <li className= "nav-item active">
-                            <Link to="/" className="nav-link" > Home page</Link>
-                            <Link to="/Login" onClick={Logout} className="nav-link" > Logout</Link>
+                            <Link to="/" className="nav-link" > Accueil</Link>
+                            <Link to="/Login" onClick={Logout} className="nav-link" > Déconnexion</Link>
 
                         </li>
                         
