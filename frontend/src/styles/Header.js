@@ -22,7 +22,7 @@ export default function Header(){
                     <ul className="navbar-nav  ">
                         <li className= "nav-item active">
                             <Link to="/" className="nav-link" > Accueil</Link>
-                            <Link to="/Utilisateurs" className="nav-link" > Utilisateurs</Link>
+                            <Link to="/Lister_utilisateurs" className="nav-link" > Utilisateurs</Link>
                             <Link to="/Login" onClick={Logout} className="nav-link" > Déconnexion</Link>
 
                         </li>

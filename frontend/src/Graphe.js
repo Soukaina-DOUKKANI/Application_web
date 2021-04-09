@@ -30,33 +30,16 @@ export default function Graphe({data, procedure}){
       }
     })
 
-    return tb_keys;
-    /*.map(key => {
-      if(key=='title'){
-        return(
-          <div>
-            {`${key} : ${obj[key]}`}
-          </div>
-        )
-      }else{
-        return(
-          <div>
-            {
-              `${key} -
-              visible : ${obj[key+'_visible']}
-              label : ${obj[key+'_label']}
-              chart : ${obj[key+'_chart']}
-              axe : ${obj[key+'_axe']}`
-            }
-          </div>
-        )
-      }
-    })*/
+    return tb_keys;   
  };
+
+
  let types={};
  let objChart={columns : []};
  let axisChart = {};
  let titre='';
+ let axes={};
+
 
  useEffect(()=>{
 
@@ -101,14 +84,29 @@ export default function Graphe({data, procedure}){
         if(dataG[key+'_axe']=='y'){
 
           types[key] = dataG[key+'_chart'];
+          axisChart.y =  {
+            label : {text:  dataG[key+'_label'],
+                     position: 'outer-middle'}
+            
+          }
+        }
+
+        if(dataG[key+'_axe']=='y2'){
+          axes[key]= dataG[key+'_axe'];
+          types[key] = dataG[key+'_chart'];
+          axisChart.y2 =  {
+                    show: true,
+                    label : {text: dataG[key+'_label'],
+                            position: 'outer-middle'}
+             
+          }
         }
 
       }
 
     })
     objChart.types=types;
-
-  
+    objChart.axes=axes;
 
   c3.generate({
     bindto: "#chart",

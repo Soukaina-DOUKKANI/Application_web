@@ -4,7 +4,6 @@ import {Redirect, Route} from 'react-router-dom';
 
 export default function ProtectedRoutes({component: Component,role, ...rest}){
     
-    console.log({Component, role})
     return(
         <>
         {Permissions(role) && (

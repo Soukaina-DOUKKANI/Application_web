@@ -10,6 +10,7 @@ var bcrypt= require('bcrypt');
 app.use(express.json())
 
 var cors = require('cors');    
+const { request } = require('express');
 app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
 
 
@@ -33,69 +34,7 @@ sql.connect(config, function (err) {
         return;
     }
 
-// Enregistrement des comptes Utilisateurs
-app.post('/users', function(req,res){
-    const request= new sql.Request();
-    const id=req.body.id;
-    const utilisateur= req.body.utilisateur;
-    const identifiant= req.body.identifiant;
-    const pwd = req.body.pwd;
 
-    bcrypt.hash(pwd, 12, function (err, hash){
-        if(err){
-            console.log(err);
-            return err;
-
-        }
-        else{
-
-            request.input("id", sql.Int, id);
-            request.input("utilisateur", sql.Text, utilisateur);
-            request.input("identifiant", sql.Text, identifiant);
-            request.input("pwd", sql.Text, pwd );
-            request.input("hash", sql.Text, hash);
-
-            request.query(`select * from Users where ID=@id   `, function(err, result) {
-                if(err){
-                    console.log(err);
-                    return (err);
-                    
-                }
-                else {
-                    if (!result.recordset.length){
-                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role) values ( @utilisateur, @identifiant, @pwd, @hash, 'user')`, function (err, insert){
-                            if (err){
-                                console.log(err);
-                                return(err);
-                            }
-                            else {
-                                res.send('success, insert user')
-                            }
-
-                        })
-                    }
-                    else{
-                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user'
-                        where ID=@id ` , function(err, update){
-                            if (err){
-                                console.log(err);
-                                return(err);
-                            }
-                            else {
-                                res.send('success, update user ')
-                    }
-
-                })
-            }
-            
-        }
-        });
-
-    }
-});
-    
-    
-})
 
 //Connexion 
 app.post('/connexion', function (req,res) {
@@ -167,6 +106,72 @@ const verifyJwt = (req,res,next) =>{
 
 app.use(verifyJwt)
 
+// Enregistrement des comptes Utilisateurs
+app.post('/users', function(req,res){
+    const request= new sql.Request();
+    const id=req.body.id;
+    const utilisateur= req.body.utilisateur;
+    const identifiant= req.body.identifiant;
+    const pwd = req.body.pwd;
+    const procedures = JSON.stringify( req.body.procedures);
+
+    bcrypt.hash(pwd, 12, function (err, hash){
+        if(err){
+            console.log(err);
+            return err;
+
+        }
+        else{
+
+            request.input("id", sql.Int, id);
+            request.input("utilisateur", sql.Text, utilisateur);
+            request.input("identifiant", sql.Text, identifiant);
+            request.input("pwd", sql.Text, pwd );
+            request.input("hash", sql.Text, hash);
+            request.input("procedures", sql.Text, procedures);
+
+            request.query(`select * from Users where ID=@id   `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures)`, function (err, insert){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert user')
+                            }
+
+                        })
+                    }
+                    else{
+                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures
+                        where ID=@id ` , function(err, update){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update user ')
+                    }
+
+                })
+            }
+            
+        }
+        });
+
+    }
+});
+    
+    
+})
+
 //Validate connexion
 app.get('/IsConnected', function(req,res){
      res.send({isLoggedIn: true, role:req.roleUser})
@@ -199,6 +204,49 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
         }
     })
 })
+//Utilisateurs : Affichage de la liste des utilisateurs, affichage des procedures stockees
+
+app.get('/list_users', function(req,res){
+    var request= new sql.Request();
+
+    request.query(`select ID, nom_utilisateur, identifiant from Users where role like 'user' `, function(err,result){
+        if(err){
+            console.log(err);
+            return err;
+        }
+        else{
+            res.send(result.recordset);
+        }
+    })
+})
+
+app.get('/get_user/:id', function(req,res){
+    var request= new sql.Request();
+    var id=req.params.id;
+    request.query(`select * from Users where ID=${id} `, function(err,result){
+        if(err){
+            console.log(err);
+            return err;
+        }
+        else{
+            res.send(result.recordset[0]);
+        }
+    })
+})
+
+app.get('/List_procedures', function(req,res){
+    var request= new sql.Request();
+    request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, result){
+        if(err){
+            console.log(err);
+            return err;
+        }
+        else{
+            res.send(result.recordset);
+        }
+    })
+})
+
 
 // affichage des metadata des PS
 app.get('/app', function (req, res) {
@@ -217,11 +265,18 @@ app.get('/app', function (req, res) {
 
        }
        else{
-        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE  SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN' ", function (err, results){
-            if (err) console.log(err)
+        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN'  ", function (err, results){
+            if (err){
+                console.log(err);
+                return (err);
+            } 
 
             // afficher le resultat de la procedure 
-            res.send(results.recordset);
+            else{
+                
+                res.send(results.recordset)
+
+            }
         });
 
        }

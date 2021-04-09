@@ -39,8 +39,10 @@ export default function Interface_utilisateur({match}){
      
     return (
        <div className="container"> 
-        <form onSubmit={handleSubmit(onSubmit)}>
-            <div  >
+        <form  onSubmit={handleSubmit(onSubmit)}>
+        <table className="table table-light" >  
+
+            <tbody  >
             {
                 
                 Object.keys(data).map((key ) =>{
@@ -53,12 +55,20 @@ export default function Interface_utilisateur({match}){
                             </div> 
                             )
                     }
+                    if(key=='description'){
+                        return(
+                            <tr  className="row">
+                                <th>Description</th>
+                                <td  >{data[key]} </td>  
+                            </tr>
+                        )
+                    }
                     if (key.charAt(0)=="@"){
                         return(
-                            <div className="row"  > 
-                                <span style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </span>  
-                                <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
-                            </div>)
+                            <tr  className="row"  > 
+                                <th style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </th>  
+                               <td> <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} /> </td>
+                            </tr>)
                     } 
                     
                 })
@@ -66,8 +76,9 @@ export default function Interface_utilisateur({match}){
             <div className="div">
                 <button className="button" type="submit"> Executer</button> 
             </div>
-           
-        </div>
+        </tbody>
+          
+        </table>
 
         </form>
          <div className="container" style= {{"margin-top": "30px "}}>

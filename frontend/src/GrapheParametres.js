@@ -46,6 +46,7 @@ export default function GrapheParametre({match}){
 
    
     const options=[
+        {value:'null',label:'null'},
         {value:'line', label:'Line chart'},
         {value:'bar', label:'Bar chart'},
         {value:'timeseries ', label:'Timeseries Chart'},
@@ -62,8 +63,10 @@ export default function GrapheParametre({match}){
         ]
 
     const values=[
+        {value:'null',label:'null'},
         {value:'x',label:'x'},
-        {value:'y',label:'y'}
+        {value:'y',label:'y'},
+        {value:'y2',label:'y2'}
     ]
     
     console.log('result',graph[0])
@@ -72,7 +75,7 @@ export default function GrapheParametre({match}){
         <div className="container"> 
          <form key={1} onSubmit={handleSubmit(onSubmit)}>
              <div  >
-             {
+             { 
                  
                  Object.keys(data).map((key ) =>{
                      if (key=='procedure'){
@@ -115,13 +118,16 @@ export default function GrapheParametre({match}){
                     
                 {Object.keys(graph[0]).map(key =>{
                     return(
+                    
                     <tr>
                        <th>{key}</th>
                        <td>
                         <input class="form-check-input" type="checkbox"  name={key+'_visible'}  ref={register2}  />Visible
                        </td> 
                        
-                       
+                       <td>
+                           <input autoComplete='off' placeholder='Label' name={key+'_label'}  ref={register2} />
+                       </td>
                        <td>
                             <select  name ={key + '_chart'} ref={register2}>
                                 {options.map(item =>{

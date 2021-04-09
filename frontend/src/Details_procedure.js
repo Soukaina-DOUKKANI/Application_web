@@ -26,6 +26,7 @@ export default function Details_procedures({match}){
         console.log(JSON.stringify(formData))
 
     }
+    console.log(data)
     return(
         <div className="container-fluid">
             <div className="row">
@@ -39,7 +40,7 @@ export default function Details_procedures({match}){
                 <tr>
                    <th>NOM DE LA PROCEDURE</th> 
                    <td>
-                    <input name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
+                    <input  name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
                    </td>
                 </tr>
                 <tr>
@@ -52,7 +53,9 @@ export default function Details_procedures({match}){
                 </tr>
                 <tr>
                    <th>DESCRIPTION</th>  
-                   <td>{data.SP_DESCRIPTION}</td>
+                   <td>
+                   <textarea className='form-control' name="description" autoComplete="off"  type="text"  placeholder="Ajouter une description" ref={register} ></textarea> 
+                   </td>
                 </tr>
                 <tr>
                    <th>NOM DE L'AUTEUR</th>
@@ -74,7 +77,7 @@ export default function Details_procedures({match}){
                             return (
                                 <p>
                                 <span className="span" >{item.PARAMETER_NAME}</span>
-                                <span className="span"><input name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
+                                <span className="span"><input  name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
                                  </p>
                                      
                             );}
@@ -82,19 +85,17 @@ export default function Details_procedures({match}){
                                 return(
                                  <div >
                                  <span className="span" >{item.PARAMETER_NAME}</span>
-                                  <span className="span" ><input className="input" autoComplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
-                                  <p className="p" ><input autoComplete='OFF' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
+                                  <span className="span" ><input className=' input'  autoComplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
+                                  <p className="p" ><input  autoComplete='OFF' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
                                   OU
                                   <p className="p">
-                                  <textarea  className="textarea" autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
+                                  <textarea  className=" textarea" autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
                                   </p>
                                   </div>
                                 );
                             }
                        })}</td>
                 </tr>
-
-                   
             </tbody>
            </table> 
             <div className="div" > 

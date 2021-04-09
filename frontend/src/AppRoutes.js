@@ -10,6 +10,7 @@ import Axios from './AxiosInstance';
 import ProtectedRoutes from './ProtectedRoutes';
 import HomePage from './HomePage';
 import GrapheParametres from './GrapheParametres';
+import Lister_utilisateurs from './Lister_utilisateurs';
 
 
 
@@ -41,7 +42,9 @@ export default function AppRoutes(){
             <Switch> 
                 <Route path="/Login" exact  component={Login} />
                 <Route path="/" exact  component={List_procedures} />
+                <ProtectedRoutes path="/Lister_utilisateurs" exact component={Lister_utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path="/Utilisateurs" exact component={Utilisateurs} role={['admin']}/>
+                <ProtectedRoutes path="/Utilisateurs/:id" exact component={Utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path= "/Details_procedure/:name" exact component={Details_procedures} role={['admin']}/>
                 <ProtectedRoutes path= "/Interface_utilisateur/:proc" exact component={Interface_utilisateur} role={['user']}/>
                 <ProtectedRoutes path= "/GrapheParametres/:proc" exact component={GrapheParametres} role={['admin']}/>
