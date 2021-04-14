@@ -1,18 +1,23 @@
 import React , {useState, useContext, useEffect} from 'react';
-import {useForm} from 'react-hook-form';
+import {useForm, Controller} from 'react-hook-form';
 import {LoginContext} from '../LoginContext';
 import Axios from '../AxiosInstance'; 
 import generator from 'generate-password';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {useHistory} from 'react-router-dom';
+import Select from "react-select";
 
 
 export default function Utilisateurs({match}){
      
     const [alerte, setAlerte]=useState(false);
     const [userData, setUserData] =useState({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[]});
-    const {register, handleSubmit }= useForm();
+    const {register, handleSubmit, control }= useForm();
     const [user,setUser]=useContext(LoginContext);
     const [procedure, setProcedure]=useState([]);
+    const history= useHistory();
+    const [selectedOption, setSelectedOption] = useState(null);
+
 
 
     useEffect(() => {
@@ -24,7 +29,6 @@ export default function Utilisateurs({match}){
     
     useEffect(() => {
     const id=match.params.id;
-    console.log(match)
     if(id){
         Axios(setUser).get(`http://localhost:4000/get_user/${id}`)
         .then(result => {
@@ -43,6 +47,8 @@ export default function Utilisateurs({match}){
 
     }
    
+
+   
     
     }, [])
 
@@ -59,13 +65,21 @@ export default function Utilisateurs({match}){
 
     const handleChange = e =>{
         const {name, value }=e.target;
-        console.log(name, value )
         setUserData (prevUser => ({
             ...prevUser,
             [name] :value
         }));
 
     }
+    const handleChange2 = (e) => {
+        let target = e.target
+        let name = target.name
+        let value = Array.from(target.selectedOptions, option => option.value);
+        setUserData (prevUser => ({
+            ...prevUser,
+            [name] :value
+        }));
+      }
 
     function password(){
         const pass= generator.generate({
@@ -95,8 +109,8 @@ export default function Utilisateurs({match}){
         console.log(data)
         Axios(setUser).post('http://localhost:4000/users', data).then( result => console.log(result))
         .catch(err => console.log(err));  
-        setUserData({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[]})
-
+        //setUserData({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[]})
+        history.push('/Lister_utilisateurs')
     }
 
 
@@ -130,7 +144,7 @@ export default function Utilisateurs({match}){
 
     return (
         <div className="container" >
-            <h2>Création des comptes</h2>
+            <h2> Gestion des comptes Utilisateurs</h2>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-group" class="col-md-6">
                     <input type="hidden" name='id' value={userData.id} ref={register}/>
@@ -158,19 +172,28 @@ export default function Utilisateurs({match}){
                             <button className="btn btn-outline-secondary" type="button" onClick={onClick}> Générer</button>
                         </div>
                     </div>
-                    <label>Liste des procedures </label>
+                    <label>Liste des procédures </label>
                     <div className="input-group mb-3">
-                        <select multiple={true} name='procedures' onChange={handleChange} value={userData.procedures}  ref={register}>
+                        
+                        <select multiple={true} name='procedures' onChange={handleChange2} value={userData.procedures}  ref={register}>
                                             {procedure.map(item =>{
                                                 return (
                                                     <option value={item.P}>{item.P}</option>
                                                 )})}
-                                        </select> 
+                                                </select> 
+                           {/* <Controller
+                                as={Select}
+                                name="procedures"
+                                options={options(procedure)}
+                                isMulti
+                                control={control}
+                           />*/}
+
 
 
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" >Enregistrer </button>
+                <button onClick={()=> alert('Modifications enregistrées')} type="submit" class="btn btn-primary" >Enregistrer </button>
 
 
             </form>

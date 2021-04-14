@@ -35,6 +35,71 @@ sql.connect(config, function (err) {
     }
 
 
+// Enregistrement des comptes Utilisateurs
+app.post('/users', function(req,res){
+    const request= new sql.Request();
+    const id=req.body.id;
+    const utilisateur= req.body.utilisateur;
+    const identifiant= req.body.identifiant;
+    const pwd = req.body.pwd;
+    const procedures = JSON.stringify( req.body.procedures);
+
+    bcrypt.hash(pwd, 12, function (err, hash){
+        if(err){
+            console.log(err);
+            return err;
+
+        }
+        else{
+
+            request.input("id", sql.Int, id);
+            request.input("utilisateur", sql.Text, utilisateur);
+            request.input("identifiant", sql.Text, identifiant);
+            request.input("pwd", sql.Text, pwd );
+            request.input("hash", sql.Text, hash);
+            request.input("procedures", sql.Text, procedures);
+
+            request.query(`select * from Users where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures)`, function (err, insert){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert user')
+                            }
+
+                        })
+                    }
+                    else{
+                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures
+                        where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant ` , function(err, update){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update user ')
+                    }
+
+                })
+            }
+            
+        }
+        });
+
+    }
+});
+    
+    
+})
 
 //Connexion 
 app.post('/connexion', function (req,res) {
@@ -55,8 +120,11 @@ app.post('/connexion', function (req,res) {
             if(result.recordset.length > 0){
                 bcrypt.compare(pwd, result.recordset[0].hash ,  (error, response)=>{
                     if (response){
-                        const {id, role}= result.recordset[0];
-                        const token= jwt.sign({id , role}, "jwtSecret", {expiresIn: 60*60*4})
+                        const id=result.recordset[0].ID;
+                        const role=result.recordset[0].role;
+                        const values={id,role}
+                        const token= jwt.sign(values, "jwtSecret", {expiresIn: 60*60*4})
+                        //console.log({ auth: true, token:token , response: {id, role}})
                         res.json( { auth: true, token:token , response: {id, role}})
 
                     }
@@ -91,7 +159,6 @@ const verifyJwt = (req,res,next) =>{
                 res.status(403).send('token expired')
             }
             else{
-                
                 req.userId = decoded.id;
                 req.roleUser=decoded.role;
                 next();
@@ -106,71 +173,7 @@ const verifyJwt = (req,res,next) =>{
 
 app.use(verifyJwt)
 
-// Enregistrement des comptes Utilisateurs
-app.post('/users', function(req,res){
-    const request= new sql.Request();
-    const id=req.body.id;
-    const utilisateur= req.body.utilisateur;
-    const identifiant= req.body.identifiant;
-    const pwd = req.body.pwd;
-    const procedures = JSON.stringify( req.body.procedures);
 
-    bcrypt.hash(pwd, 12, function (err, hash){
-        if(err){
-            console.log(err);
-            return err;
-
-        }
-        else{
-
-            request.input("id", sql.Int, id);
-            request.input("utilisateur", sql.Text, utilisateur);
-            request.input("identifiant", sql.Text, identifiant);
-            request.input("pwd", sql.Text, pwd );
-            request.input("hash", sql.Text, hash);
-            request.input("procedures", sql.Text, procedures);
-
-            request.query(`select * from Users where ID=@id   `, function(err, result) {
-                if(err){
-                    console.log(err);
-                    return (err);
-                    
-                }
-                else {
-                    if (!result.recordset.length){
-                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures)`, function (err, insert){
-                            if (err){
-                                console.log(err);
-                                return(err);
-                            }
-                            else {
-                                res.send('success, insert user')
-                            }
-
-                        })
-                    }
-                    else{
-                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures
-                        where ID=@id ` , function(err, update){
-                            if (err){
-                                console.log(err);
-                                return(err);
-                            }
-                            else {
-                                res.send('success, update user ')
-                    }
-
-                })
-            }
-            
-        }
-        });
-
-    }
-});
-    
-    
-})
 
 //Validate connexion
 app.get('/IsConnected', function(req,res){
@@ -254,18 +257,26 @@ app.get('/app', function (req, res) {
         var request = new sql.Request();
         const role=req.roleUser;
         const id= req.userId;
+
        // liste des  procedures stockees
        if(role=='admin'){
             request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, results){
-                if (err) console.log(err)
+                if (err) {
+                    console.log(err)
+                    return err
+                }
 
                 // afficher le resultat de la procedure 
-                res.send(results.recordset);
+                else{
+                    res.send(results.recordset);
+                   
+                }
             });
 
        }
        else{
-        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_NAME='Get_MASI_VOLUME_QUOTIDIEN'  ", function (err, results){
+        request.query(`SELECT procedures as P from Users where ID=${id} `, function (err, results){
+            
             if (err){
                 console.log(err);
                 return (err);
@@ -274,7 +285,13 @@ app.get('/app', function (req, res) {
             // afficher le resultat de la procedure 
             else{
                 
-                res.send(results.recordset)
+                const proc=JSON.parse(results.recordset[0].P);
+                const values=[]
+                proc.map(item=>{
+                    values.push({'P':item})               
+                })
+
+                res.send(values)
 
             }
         });
@@ -295,11 +312,7 @@ app.get('/page1/:name', function (req, res) {
         R.SPECIFIC_NAME             AS [SP_NAME]
         ,R.SPECIFIC_CATALOG          AS [DATABASE]
         ,R.SPECIFIC_SCHEMA          AS [SCHEMA]
-        ,ltrim(rtrim(substring(
-           R.ROUTINE_DEFINITION,
-            charindex('-- Description:',R.ROUTINE_DEFINITION) + len('-- Description:') + 1,
-            charindex('--', R.ROUTINE_DEFINITION, charindex('-- Description:',R.ROUTINE_DEFINITION) + 2) - charindex('-- Description:',R.ROUTINE_DEFINITION) - len('-- Description:') - 3
-        ))) as [SP_DESCRIPTION]
+        
         ,ltrim(rtrim(substring(
            R.ROUTINE_DEFINITION,
             charindex('-- Author:',R.ROUTINE_DEFINITION) + len('-- Author:') + 1,
@@ -318,18 +331,53 @@ app.get('/page1/:name', function (req, res) {
         order by R.CREATED`, function (err, results){
             if (err) {
                 console.log(err);
-            }
-            else {
+            }else{
                 request.query(`select PARAMETER_NAME, DATA_TYPE
-                FROM INFORMATION_SCHEMA.parameters
-                WHERE SPECIFIC_NAME='${name}'`, function (err,result){
-                    if (err) {console.log(err);}
-                    else{
-                        const obj_res = results.recordset[0];
-                        obj_res.parameters = result.recordset;
-                        res.send(obj_res);
-                    }
-                })
+                        FROM INFORMATION_SCHEMA.parameters
+                        WHERE SPECIFIC_NAME='${name}'`, function (err,result){
+                            if (err) {console.log(err);}
+                            else{
+                                const obj_res = results.recordset[0];
+                                obj_res.parameters = result.recordset;
+                                res.send(obj_res);
+                                
+                                /*
+                                request.query(`select nom_procedure, parametres from procedures where nom_procedure like '${name}'`, function(err,resultat){
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                    else{
+                                        const obj_res = results.recordset[0];
+                                        if(!obj_res){
+                                            const obj_res={}
+                                            const parameters=[]
+                                            const obj_res2= resultat.recordset
+                                            obj_res2.map(item=>{
+
+                                                obj_res.SP_NAME=item.nom_procedure
+                                                params=item.parametres.split(',')
+                                                params.map(item=>{
+                                                    if(item.charAt(0)=='@'){
+                                                        const i=params.indexOf(item)
+                                                        parameters.push({PARAMETER_NAME: params[i], DATA_TYPE: params[i+1]})
+                                                    }
+                                                })
+                                                obj_res.parameters=parameters
+                                            })
+                                            console.log(obj_res)
+                                            res.send(obj_res)
+
+                                        }
+                                        else{
+                                            obj_res.parameters = result.recordset;
+                                            res.send(obj_res);
+
+                                        }
+                                                                              
+                                }
+                                })*/
+                            }
+                        })
             }
         });
 
@@ -506,5 +554,84 @@ app.get('/getGraph/:name',function(req,res){
         }
     })
 })
+//ajouter une procedure
+app.post('/AjoutProcedure', function(req,res){
+    const request=new sql.Request();
+    const traiter_obj=(obj)=>{
+        let params=[]
+        
+        Object.keys(obj).map(key =>{
+            let key_= key.split('-')[0]
+            if(key_=='param'){ 
+               
+                params.push(obj[key])
+                
+            }
+            if(key_=='type'){
+                params.push(obj[key])
+            }
+           
+          
+        })
+        return(params)
+    }    
+    request.input('name', sql.Text, req.body.name)
+    request.input('bdd', sql.Text, req.body.bdd)
+    request.input('procedure', sql.Text, req.body.procedure)
+    request.input('parameters', sql.Text, traiter_obj(req.body))
+   
+
+    
+    request.query(`select * from procedures where nom_procedure like @name `, function(err, result) {
+        if(err){
+            console.log(err);
+            return (err);
+            
+        }
+        else {
+            if (!result.recordset.length){
+                request.query( `insert into procedures (nom_procedure, bdd, procedure_code,parametres) values (@name,@bdd, @procedure, @parameters)`, function (err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, insert proc')
+                    }
+
+                })
+            }
+            else{
+                request.query(`UPDATE procedures  SET nom_procedure=@name,bdd=@bdd, procedure_code=@procedure,  parametres=@parameters
+               
+                where nom_procedure like @name  ` , function(err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, update proc ')
+                    }
+
+                })
+            }
+            let query_= 'execute SP_builder @procedure , @bdd'
+            request.query(query_ , function (err, result){
+
+                if (err) {console.log(err)}
+                else{
+                    console.log('success procedure creation')
+                    res.send('SP success');
+
+                }
+    
+            });
+            
+        }
+        
+        });
+
+
+});
 
 app.listen(port,  () => console.log(`server is running app on port ${port}`));

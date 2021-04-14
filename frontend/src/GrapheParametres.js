@@ -30,7 +30,7 @@ export default function GrapheParametre({match}){
 
     const onSubmit =(df)=>{
        
-        Axios(setUser).post(`http://localhost:4000/set_procedure`, df)
+        Axios(setUser).post(`http://localhost:4000/set_procedure/`, df)
         .then (result => {
             setGraph(result.data);
         })
@@ -51,13 +51,10 @@ export default function GrapheParametre({match}){
         {value:'bar', label:'Bar chart'},
         {value:'timeseries ', label:'Timeseries Chart'},
         {value:'spline', label:'Spline Chart'},
-        {value:'simple XY Line ', label:'Simple XY Line Chart'},
-        {value:'multiple XY Line ', label:'Multiple XY Line Chart'},
-        {value:'line Chart with Regions', label:'Line Chart with Regions'},
-        {value:'area', label:'Area Chart'},
+        {value:'area-spline', label:' area Spline Chart'},
+        {value:'step', label:'Area Chart'},
+        {value:'area-step', label:'Area Step Chart'},
         {value:'scatter ', label:'Scatter Plot'},
-        {value:'stacked Area ', label:'Stacked Area Chart'},
-        {value:'stacked Bar', label:'Stacked Bar Chart'},
         {value:'pie', label:'Pie Chart'},
         {value:'donut', label:'Donut Chart'}
         ]

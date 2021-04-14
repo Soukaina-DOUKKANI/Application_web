@@ -11,6 +11,7 @@ import ProtectedRoutes from './ProtectedRoutes';
 import HomePage from './HomePage';
 import GrapheParametres from './GrapheParametres';
 import Lister_utilisateurs from './Lister_utilisateurs';
+import AjoutProcedure from './AjoutProcedure';
 
 
 
@@ -42,6 +43,7 @@ export default function AppRoutes(){
             <Switch> 
                 <Route path="/Login" exact  component={Login} />
                 <Route path="/" exact  component={List_procedures} />
+                <ProtectedRoutes path="/AjoutProcedure" exact component={AjoutProcedure} role={['admin']}/>
                 <ProtectedRoutes path="/Lister_utilisateurs" exact component={Lister_utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path="/Utilisateurs" exact component={Utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path="/Utilisateurs/:id" exact component={Utilisateurs} role={['admin']}/>

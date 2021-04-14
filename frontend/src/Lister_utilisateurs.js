@@ -1,10 +1,8 @@
 import React, {useContext,useState,useEffect} from 'react';
 import {LoginContext} from './LoginContext';
 import Axios from './AxiosInstance'; 
-import {useForm, Controller} from 'react-hook-form';
 import {Link} from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css' ;
-import Select from 'react-select';
 
 
 export default function Lister_utilisateurs(){
@@ -25,13 +23,6 @@ export default function Lister_utilisateurs(){
         .catch(err=> console.log(err))
     },[])
     
-    
-
-    const onSubmit=(data)=>{
-        Axios(setUser).post(`http://localhost:4000/procedures`, data)
-        .then(result=>console.log(result))
-        .catch(err=> console.log(err))
-    }
     
    
     return(

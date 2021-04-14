@@ -19,6 +19,7 @@ export default function Details_procedures({match}){
     }, []); 
     
     
+    
     const onSubmit = (formData)=>{
         Axios(setUser).post(`http://localhost:4000/set_data/${match.params.name}`, formData)
         .then (result => console.log(result))
@@ -26,7 +27,6 @@ export default function Details_procedures({match}){
         console.log(JSON.stringify(formData))
 
     }
-    console.log(data)
     return(
         <div className="container-fluid">
             <div className="row">
@@ -105,8 +105,10 @@ export default function Details_procedures({match}){
             </Link>
             </div>
            
-        </form>   
-        </div>  
+        </form> 
+        
+        </div> 
+        
         </div>
         )
 }
