@@ -2,8 +2,7 @@ import React, {useContext} from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Link} from 'react-router-dom';
 import {LoginContext} from '../LoginContext';
-
-import {Nav, NavDropdown} from 'react-bootstrap';
+import {NavDropdown} from 'react-bootstrap';
 
 export default function Header(){
     const [user,setUser]=useContext(LoginContext);
@@ -32,7 +31,7 @@ export default function Header(){
                             <Link to="/Lister_utilisateurs" className="nav-link" > Utilisateurs</Link>
                         </li>
                         <NavDropdown title="Ajouter" id="basic-nav-dropdown">
-                            <NavDropdown.Item> <Link to ="/AjoutProcedure">Ajouter une procedure</Link></NavDropdown.Item>
+                            <NavDropdown.Item> <Link to ="/AjoutProcedure">Ajouter une procédure</Link></NavDropdown.Item>
                             <NavDropdown.Item><Link to="/AjoutFonction" >Ajouter une fonction</Link></NavDropdown.Item>
                             
                         </NavDropdown>
@@ -55,6 +54,8 @@ export default function Header(){
                     <ul className="navbar-nav  ">
                         <li className= "nav-item active">
                             <Link to="/" className="nav-link" > Accueil</Link>
+                        </li>
+                        <li>
                             <Link to="/Login" onClick={Logout} className="nav-link" > Déconnexion</Link>
 
                         </li>

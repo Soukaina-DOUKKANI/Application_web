@@ -10,7 +10,7 @@ var bcrypt= require('bcrypt');
 app.use(express.json())
 
 var cors = require('cors');    
-const { request } = require('express');
+
 app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
 
 
@@ -43,6 +43,7 @@ app.post('/users', function(req,res){
     const identifiant= req.body.identifiant;
     const pwd = req.body.pwd;
     const procedures = JSON.stringify( req.body.procedures);
+    const fonctions = JSON.stringify( req.body.fonctions);
 
     bcrypt.hash(pwd, 12, function (err, hash){
         if(err){
@@ -58,6 +59,8 @@ app.post('/users', function(req,res){
             request.input("pwd", sql.Text, pwd );
             request.input("hash", sql.Text, hash);
             request.input("procedures", sql.Text, procedures);
+            request.input("fonctions", sql.Text, fonctions);
+
 
             request.query(`select * from Users where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant `, function(err, result) {
                 if(err){
@@ -67,7 +70,7 @@ app.post('/users', function(req,res){
                 }
                 else {
                     if (!result.recordset.length){
-                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures)`, function (err, insert){
+                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures, fonctions) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures, @fonctions)`, function (err, insert){
                             if (err){
                                 console.log(err);
                                 return(err);
@@ -79,7 +82,7 @@ app.post('/users', function(req,res){
                         })
                     }
                     else{
-                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures
+                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures, fonctions=@fonctions
                         where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant ` , function(err, update){
                             if (err){
                                 console.log(err);
@@ -96,9 +99,7 @@ app.post('/users', function(req,res){
         });
 
     }
-});
-    
-    
+});    
 })
 
 //Connexion 
@@ -222,6 +223,7 @@ app.get('/list_users', function(req,res){
     })
 })
 
+//GET USER DATA BY ID
 app.get('/get_user/:id', function(req,res){
     var request= new sql.Request();
     var id=req.params.id;
@@ -246,10 +248,47 @@ app.get('/BDD', function(req,res){
         }
     })
 })
-// get list of SP
+
+
+
+// GET LIST OF SP
 app.get('/List_procedures', function(req,res){
     var request= new sql.Request();
-    request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, result){
+    request.query(`CREATE TABLE #x(db SYSNAME, S SYSNAME, P SYSNAME);
+                    DECLARE @sql NVARCHAR(MAX) = N'';
+                    SELECT @sql += N'INSERT #x SELECT ''' + name + ''',S.name, P.name
+                    FROM ' + QUOTENAME(name) + '.sys.schemas AS S
+                    INNER JOIN ' + QUOTENAME(name) + '.sys.procedures AS P
+                    ON P.schema_id = S.schema_id;
+                    ' FROM sys.databases WHERE database_id > 4
+                    EXEC sp_executesql @sql;
+                    SELECT P FROM #x where LEFT(P, 3) NOT IN ('sp_', 'xp_', 'ms_') `, function(err,result){
+                        if (err){console.log(err)}
+                        else{
+                            res.send(result.recordset)
+
+                        }
+                    })
+    
+})
+
+//GET LIST OF FUNCTIONS
+
+app.get('/List_fonctions', function(req,res){
+    var request= new sql.Request();
+    request.query(`CREATE TABLE #x(db SYSNAME, S SYSNAME, F SYSNAME, Type_fn SYSNAME);
+    
+                    DECLARE @sql NVARCHAR(MAX) = N'';
+                    
+                    SELECT @sql += N'INSERT #x SELECT ''' + name + ''',s.name, F.name, F.type
+                    FROM ' + QUOTENAME(name) + '.sys.schemas AS s
+                    INNER JOIN ' + QUOTENAME(name) + '.sys.Objects AS F
+                    ON F.schema_id = s.schema_id;' 
+                    FROM sys.databases WHERE database_id > 4
+                    
+                    EXEC sp_executesql @sql;
+                    
+                    SELECT F FROM #x where Type_fn in ('IF', 'TF', 'FT') `, function (err, result){
         if(err){
             console.log(err);
             return err;
@@ -260,69 +299,107 @@ app.get('/List_procedures', function(req,res){
     })
 })
 
-app.get('/appFonction', function(req,res){
+//show list of functions to user in checkbox
+app.get('/appFonction/:baseDD', function(req,res){
     const request=new sql.Request();
     const role=req.roleUser;
     const id= req.userId;
+    const bdd=req.params.baseDD;
 
        // liste des  procedures stockees
-       if(role=='admin'){
-            request.query("SELECT SPECIFIC_NAME as F FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'function' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_', 'fn_') ", function (err, results){
-                if (err) {
-                    console.log(err)
-                    return err
-                }
+        if(role=='admin'){
+            request.query(`use ${bdd}`, function (err, results){
+                if(err){console.log(err)}
+                else{
+                    request.query(`SELECT SPECIFIC_NAME as F FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_CATALOG='${bdd}' AND ROUTINE_TYPE = 'function' AND LEFT(ROUTINE_NAME, 3) NOT IN ('fn_') `, function (err, results){
+                        if (err) {
+                            console.log(err)
+                            return err
+                        }
+        
+                        // afficher le resultat de la procedure 
+                        else{
+                            res.send(results.recordset);
+                           
+                        }
+                    });
+        
 
+                }
+            })
+            
+        }
+        else{
+            request.query(`SELECT fonctions as F from Users where ID=${id} `, function (err, results){
+                
+                if (err){
+                    console.log(err);
+                    return (err);
+                } 
+    
                 // afficher le resultat de la procedure 
                 else{
-                    res.send(results.recordset);
-                   
-                }
-            });
-
-        }
+                    
+                    const proc=JSON.parse(results.recordset[0].F);
+                    const values=[]
+                    proc.map(item=>{
+                        values.push({'F':item})               
+                    })
     
-
-
+                    res.send(values)
+    
+                }
+        });
+    
+    }
+  
 })
 
 //affichage des PS et fonction
-app.get('/allData', function (req, res) {
+app.get('/allData/:baseDD', function (req, res) {
     // creation de la requete SQL
     var request = new sql.Request();
     const role=req.roleUser;
     const id= req.userId;
+    const bdd=req.params.baseDD;
 
    // liste des  procedures stockees
    if(role=='admin'){
-        request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, resultats){
-            if (err) {
-                console.log(err)
-                return err
-            }
+       request.query(`use ${bdd}`, function(err,results){
+           if(err){console.log(err)}
+           else{
+            request.query(`SELECT SPECIFIC_NAME as P FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_CATALOG='${bdd}' AND  ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') `, function (err, resultats){
+                if (err) {
+                    console.log(err)
+                    return err
+                }
+    
+                // afficher le resultat de la procedure 
+                else{
+    
+                    request.query(`SELECT SPECIFIC_NAME as F FROM INFORMATION_SCHEMA.ROUTINES WHERE  ROUTINE_TYPE = 'function' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_', 'fn_') `, function (err, results){
+                        if (err) {
+                            console.log(err)
+                            return err
+                        }
+    
+                        // afficher le resultat de la procedure 
+                        else{
+                            const obj=resultats.recordset
+                            const fonctions=results.recordset
+                            fonctions.map(item=>{
+                                obj.push(item)
+                            })
+                            res.send(obj)
+                        
+                        }
+                    })   
+                }
+            });
 
-            // afficher le resultat de la procedure 
-            else{
-
-                request.query("SELECT SPECIFIC_NAME as F FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'function' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_', 'fn_') ", function (err, results){
-                    if (err) {
-                        console.log(err)
-                        return err
-                    }
-
-                    // afficher le resultat de la procedure 
-                    else{
-                        const obj=resultats.recordset
-                        const fonctions=results.recordset
-                        fonctions.map(item=>{
-                            obj.push(item)
-                        })
-                        res.send(obj)
-                    
-                    }
-                })   
-            }
-        });
+           }
+       })
+        
 
    }
    else{
@@ -335,15 +412,32 @@ app.get('/allData', function (req, res) {
 
         // afficher le resultat de la procedure 
         else{
-            
-            const proc=JSON.parse(results.recordset[0].P);
-            const values=[]
-            proc.map(item=>{
-                values.push({'P':item})               
-            })
+                request.query(`SELECT fonctions as F from Users where ID=${id} `, function (err, resultats){
+                    
+                    if (err){
+                        console.log(err);
+                        return (err);
+                    } 
+        
+                    // afficher le resultat de la procedure 
+                    else{
+                        
+                        const proc=JSON.parse(results.recordset[0].P);
+                        const fct=JSON.parse(resultats.recordset[0].F)
+                        const values=[]
+                        proc.map(item=>{
+                            values.push({'P':item})               
+                        })
 
-            res.send(values)
-
+                        fct.map(item=>{
+                            values.push({'F':item})
+                        })
+        
+                        res.send(values)
+        
+                    }
+                });
+        
         }
     });
 
@@ -353,29 +447,37 @@ app.get('/allData', function (req, res) {
 });
 
 // affichage des PS
-app.get('/app', function (req, res) {
+app.get('/appProcedure/:baseDD', function (req, res) {
         // creation de la requete SQL
         var request = new sql.Request();
         const role=req.roleUser;
         const id= req.userId;
+        const bdd=req.params.baseDD;
 
        // liste des  procedures stockees
        if(role=='admin'){
-            request.query("SELECT SPECIFIC_NAME as P FROM GI_BVC_DTM.INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') ", function (err, results){
-                if (err) {
-                    console.log(err)
-                    return err
-                }
+           request.query(`use ${bdd}`, function(err,results){
+               if(err){console.log(err)}
+               else{
+                request.query(`SELECT SPECIFIC_NAME as P FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_CATALOG='${bdd}' AND ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') `, function (err, results){
+                    if (err) {
+                        console.log(err)
+                        return err
+                    }
+    
+                    // afficher le resultat de la procedure 
+                    else{
+                        res.send(results.recordset);
+                       
+                    }
+                });
 
-                // afficher le resultat de la procedure 
-                else{
-                    res.send(results.recordset);
-                   
-                }
-            });
+               }
+           })
+            
 
        }
-       else{
+        else{
         request.query(`SELECT procedures as P from Users where ID=${id} `, function (err, results){
             
             if (err){
@@ -634,6 +736,44 @@ app.get('/Get_values_fct/:fct', function (req,res){
     
 })
 
+
+
+
+//Execution de la procedure stockee
+app.post('/set_procedure', function(req,res){
+    const request=new sql.Request();
+    let query_ = 'Execute';
+    request.input('procedure', sql.VarChar, req.body.nameProc);
+    query_ += ' @procedure'; 
+    
+    for (let i in req.body){
+        if (i.toLowerCase()=='@date_in'){
+            request.input('date', sql.Date, moment(req.body[i]).format('yyyy-MM-DD'));
+
+            query_+= ' @date';
+
+        }
+    }
+    for (let i in req.body){
+        if (i.toLowerCase()=='@titre'){
+            request.input('valeur', sql.VarChar, req.body[i])
+            query_ += ' ,@valeur' 
+        }
+    }
+   
+    request.query(query_, function(err, result){
+        if(err){
+            console.log(err);
+        }
+        else{
+            res.send(result.recordset);
+        }
+    })
+
+    
+})
+
+//Inserion des donnees du grqphe
 app.post('/setGraph/:proc', function(req,res){
     const request=new sql.Request();
     const proc=req.params.proc;
@@ -679,43 +819,6 @@ app.post('/setGraph/:proc', function(req,res){
 });
 
 
-
-//Execution de la procedure stockee
-app.post('/set_procedure', function(req,res){
-    const request=new sql.Request();
-    let query_ = 'Execute';
-    request.input('procedure', sql.VarChar, req.body.nameProc);
-    query_ += ' @procedure'; 
-    
-    for (let i in req.body){
-        if (i.toLowerCase()=='@date_in'){
-            request.input('date', sql.Date, moment(req.body[i]).format('yyyy-MM-DD'));
-
-            query_+= ' @date';
-
-        }
-    }
-    for (let i in req.body){
-        if (i.toLowerCase()=='@titre'){
-            request.input('valeur', sql.VarChar, req.body[i])
-            query_ += ' ,@valeur'
-            
-
-        }
-    }
-   
-    request.query(query_, function(err, result){
-        if(err){
-            console.log(err);
-        }
-        else{
-            res.send(result.recordset);
-        }
-    })
-
-    
-})
-
 //Execution de la fonction table
 app.post('/set_function', function(req,res){
     const request=new sql.Request();
@@ -753,7 +856,6 @@ app.post('/set_function', function(req,res){
             console.log(err);
         }
         else{
-            console.log(result.recordset)
             res.send(result.recordset);
         }
     })
@@ -805,40 +907,10 @@ app.post('/setGraphFct/:fct', function(req,res){
 
 });
 
-//create new database
-app.post('/AjoutBDD',function(req,res){
-    const request= new sql.Request();
-    request.input('bdd', sql.Text, req.body.baseBDD)
-    console.log(req.body.baseBDD)
-    
-    request.query(`create database   ${req.body.baseBDD} `, function(err,result){
-        if(err){console.log(err)}
-        else{
-            
-            request.query('select * from sys.databases where name like @bdd ', (err,resultat)=>{
-                if(err){console.log(err)}
-                else{
-                    if(resultat.recordset.length){
-                        res.send('database created successfully')
-                            }
-                    else{
-                        res.send('no database')
-
-                        }
-
-                    }
-            })
-                  
-            
-            
-        }
-    })
 
 
-})
 
-
-//get result of graph
+//get result of graph for procedures
 app.get('/getGraph/:name',function(req,res){
     const request= new sql.Request();
     const name=req.params.name;
@@ -849,6 +921,22 @@ app.get('/getGraph/:name',function(req,res){
         }
         else{
             const resGraph= JSON.parse(result.recordset[0].dataGraph)
+            res.send(resGraph);
+        }
+    })
+})
+
+//get result of graph for functions
+app.get('/getGraphFct/:name',function(req,res){
+    const request= new sql.Request();
+    const name=req.params.name;
+    request.query(`select dataGraphFct from Data_Graph where functionName like '${name}' `, function(err,result){
+        if(err){
+            console.log(err);
+            return(err);
+        }
+        else{
+            const resGraph= JSON.parse(result.recordset[0].dataGraphFct)
             res.send(resGraph);
         }
     })
@@ -896,21 +984,80 @@ app.post('/AjoutProcedure', function(req,res){
 
                 })
             }
-            let query_= 'execute SP_builder @procedure , @bdd'
+            
+            
+        }
+        
+    });
+    let query_= 'execute SP_builder @procedure , @bdd'
             request.query(query_ , function (err, result){
 
                 if (err) {console.log(err)}
                 else{
                     console.log('success procedure creation')
-                    res.send('SP success');
+                }
+    
+            });
+
+
+});
+
+//ajouter une procedure
+app.post('/AjoutFonction', function(req,res){
+    const request=new sql.Request();
+    
+    request.input('name', sql.Text, req.body.name)
+    request.input('bdd', sql.Text, req.body.bdd)
+    request.input('fonction', sql.Text, req.body.fonction)
+    
+    request.query(`select * from fonctions where nom_fonction like @name `, function(err, result) {
+        if(err){
+            console.log(err);
+            return (err);
+            
+        }
+        else {
+            if (!result.recordset.length){
+                request.query( `insert into fonctions (nom_fonction, bdd, fonction_code) values (@name,@bdd, @fonction)`, function (err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, insert fonction')
+                    }
+
+                })
+            }
+            else{
+                request.query(`UPDATE fonctions  SET nom_fonction=@name,bdd=@bdd, fonction_code=@fonction
+               
+                where nom_fonction like @name  ` , function(err){
+                    if (err){
+                        console.log(err);
+                        return(err);
+                    }
+                    else {
+                        res.send('success, update fonction')
+                    }
+
+                })
+            }
+            
+            
+        }
+        
+    });
+    let query_= 'execute SP_builder @fonction , @bdd'
+            request.query(query_ , function (err, result){
+
+                if (err) {console.log(err)}
+                else{
+                    console.log('success function creation')
 
                 }
     
             });
-            
-        }
-        
-        });
 
 
 });

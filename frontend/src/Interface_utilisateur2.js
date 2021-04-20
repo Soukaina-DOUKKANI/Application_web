@@ -5,11 +5,11 @@ import "./styles/Design.css";
 import {LoginContext} from './LoginContext';
 import Parametre from "./Parametre";
 import {useForm} from "react-hook-form";
-import Graphe  from './Graphe';
+import GrapheFct  from './GrapheFct';
 import 'c3/c3.css';
 import {ExportToExcel} from './ExportToExcel';
 
-export default function Interface_utilisateur({match}){
+export default function Interface_utilisateur2({match}){
 
     const [data, setData]= useState({});
     const [dataGraph, setDataGraph]= useState([]);
@@ -20,7 +20,7 @@ export default function Interface_utilisateur({match}){
 
 
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/Get_values/${match.params.proc}`)
+        Axios(setUser).get(`http://localhost:4000/Get_values_fct/${match.params.fct}`)
         .then(result => setData(result.data))
         .catch(err => console.log(err));  
         
@@ -29,7 +29,7 @@ export default function Interface_utilisateur({match}){
 
     const onSubmit =(df)=>{
        
-        Axios(setUser).post(`http://localhost:4000/set_procedure`, df)
+        Axios(setUser).post(`http://localhost:4000/set_function`, df)
         .then (result => setDataGraph(result.data))
         .catch(err => console.log(err));  
     }
@@ -50,7 +50,7 @@ export default function Interface_utilisateur({match}){
                             
                             <div >
                             <h2 > {data[key]}  </h2>
-                            <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
+                            <input type="hidden" value= {match.params.fct} name="nameProc" ref={register}/>
                             </div> 
                             )
                     }
@@ -81,7 +81,7 @@ export default function Interface_utilisateur({match}){
 
         </form>
          <div className="container" style= {{"margin-top": "30px "}}>
-         <Graphe data={dataGraph} procedure={match.params.proc}  />
+         <GrapheFct data={dataGraph} fonction={match.params.fct}  />
     </div>
     <div>
       {

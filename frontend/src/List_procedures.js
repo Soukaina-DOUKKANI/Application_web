@@ -16,27 +16,38 @@ export default function List_procedures(){
     const [pcd, setPcd]=useState( false);
     const [dataFct, setDataFct]=useState([]);
     const [allData, setAllData]=useState([]);
+    const [bdd,setBDD]=useState([]);
+    const [baseDD, setBaseDD]=useState('BDD');
     
+    useEffect(()=>{
+        Axios(setUser).get('http://localhost:4000/BDD')
+        .then (result =>setBDD(result.data))
+        .catch(err => console.log(err));  
+    }, []);   
 
     useEffect(() => {  
-        Axios(setUser).get("http://localhost:4000/appFonction").then(resultat => {setDataFct(resultat.data)})
+         Axios(setUser).get(`http://localhost:4000/appFonction/${baseDD}`).then(resultat => {setDataFct(resultat.data)})
         .catch(err => console.log(err));  
-    }, []);  
+    }, [baseDD]);  
+        
+    useEffect(() => {  
+        Axios(setUser).get(`http://localhost:4000/appProcedure/${baseDD}`).then(result => {setData(result.data)})
+        .catch(err => console.log(err));  
+    }, [baseDD]);  
     
     useEffect(() => {  
-        Axios(setUser).get("http://localhost:4000/app").then(result => {setData(result.data)})
+        Axios(setUser).get(`http://localhost:4000/allData/${baseDD}`).then(resultat => {setAllData(resultat.data)})
         .catch(err => console.log(err));  
-    }, []);  
+    }, [baseDD]);  
+        
 
-    useEffect(() => {  
-        Axios(setUser).get("http://localhost:4000/allData").then(resultat => {setAllData(resultat.data)})
-        .catch(err => console.log(err));  
-    }, []);  
+    const onChangeBDD=(e)=>{
+       setBaseDD(e.target.value)
+    }
 
     const setResult = p=>{
         setSearch(p);
         setDisplay(false);
- 
     }
     
     const handleChange=(e)=>{
@@ -45,13 +56,28 @@ export default function List_procedures(){
 
     const handleChange2=(e)=>{
         setFct(e.target.checked)
-
-
     }
     
-    
+   
+
     return(
         <div  className="container flex-column pas-rel">
+            {(user.role=='admin')&&
+            <div>
+            <h2>Choisir la base de données</h2>
+            <div class="form-group">
+                    <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
+                    <select  name = 'bdd'  onChange={onChangeBDD}>
+                        {bdd.map(item =>{
+                          return (
+                                   <option value={item.bdd}>{item.bdd}</option>
+                          )})}
+                    </select>
+                    
+                       
+            </div>
+            </div>
+            }
 
             <div style={{"width": "300px", 'marginTop': '20px'}}>
             <p>
@@ -76,6 +102,7 @@ export default function List_procedures(){
                     {display &&  (
                             <div  className="list-group" >
                             {data
+                            .filter(({P})=>P.toLowerCase().indexOf(search.toLowerCase())>-1)
                             .map(item =>{
                                 if(user.role=='admin'){
                                     return (
@@ -120,6 +147,7 @@ export default function List_procedures(){
                     {display &&  (
                             <div  className="list-group" >
                             {dataFct
+                            .filter(({F})=>F.toLowerCase().indexOf(search.toLowerCase())>-1)
                             .map(item =>{
                                 if(user.role=='admin'){
                                     return (
@@ -161,7 +189,7 @@ export default function List_procedures(){
                         {display &&  (
                             <div>
                             <div  className="list-group" >
-                            {allData
+                            {allData                            
                             .map(item =>{
                                 if(item.P){
                                     if(user.role=='admin'){

@@ -1,28 +1,34 @@
 import React , {useState, useContext, useEffect} from 'react';
-import {useForm, Controller} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {LoginContext} from '../LoginContext';
 import Axios from '../AxiosInstance'; 
 import generator from 'generate-password';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useHistory} from 'react-router-dom';
-import Select from "react-select";
 
 
 export default function Utilisateurs({match}){
      
     const [alerte, setAlerte]=useState(false);
-    const [userData, setUserData] =useState({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[]});
-    const {register, handleSubmit, control }= useForm();
+    const [userData, setUserData] =useState({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[], fonctions:[]});
+    const {register, handleSubmit}= useForm();
     const [user,setUser]=useContext(LoginContext);
     const [procedure, setProcedure]=useState([]);
     const history= useHistory();
-    const [selectedOption, setSelectedOption] = useState(null);
+    const [fonction , setFonction] = useState([]);
 
 
 
     useEffect(() => {
         Axios(setUser).get('http://localhost:4000/List_procedures')
         .then(result => setProcedure(result.data))
+        .catch(err=> console.log(err))
+    },[])
+    
+    useEffect(() => {
+        Axios(setUser).get('http://localhost:4000/List_fonctions')
+        .then(result => {setFonction(result.data)
+                          console.log(result)})
         .catch(err=> console.log(err))
     },[])
     
@@ -37,7 +43,9 @@ export default function Utilisateurs({match}){
                 utilisateur : result.data.nom_utilisateur,
                 identifiant : result.data.identifiant,
                 pwd: result.data.pwd,
-                procedures: JSON.parse(result.data.procedures)
+                procedures: JSON.parse(result.data.procedures),
+                fonctions: JSON.parse(result.data.fonctions)
+
                 };
 
                 setUserData(obj);
@@ -46,10 +54,6 @@ export default function Utilisateurs({match}){
         .catch(err=> console.log(err))
 
     }
-   
-
-   
-    
     }, [])
 
     const options=(obj)=>{
@@ -62,6 +66,17 @@ export default function Utilisateurs({match}){
         return (options)
     }
 
+    const options2=(obj)=>{
+        let options=[]
+        obj.map(item=>{
+           
+            options.push({value : item.F, label : item.F})
+        })
+
+        return (options)
+    }
+
+    
 
     const handleChange = e =>{
         const {name, value }=e.target;
@@ -72,6 +87,16 @@ export default function Utilisateurs({match}){
 
     }
     const handleChange2 = (e) => {
+        let target = e.target
+        let name = target.name
+        let value = Array.from(target.selectedOptions, option => option.value);
+        setUserData (prevUser => ({
+            ...prevUser,
+            [name] :value
+        }));
+      }
+
+      const handleChange3 = (e) => {
         let target = e.target
         let name = target.name
         let value = Array.from(target.selectedOptions, option => option.value);
@@ -175,22 +200,24 @@ export default function Utilisateurs({match}){
                     <label>Liste des procédures </label>
                     <div className="input-group mb-3">
                         
-                        <select multiple={true} name='procedures' onChange={handleChange2} value={userData.procedures}  ref={register}>
+                        {<select multiple={true} name='procedures' onChange={handleChange2} value={userData.procedures}  ref={register}>
                                             {procedure.map(item =>{
                                                 return (
                                                     <option value={item.P}>{item.P}</option>
                                                 )})}
-                                                </select> 
-                           {/* <Controller
-                                as={Select}
-                                name="procedures"
-                                options={options(procedure)}
-                                isMulti
-                                control={control}
-                           />*/}
-
-
-
+                                                </select> }
+                           
+                    </div>
+                    <label>Liste des fonctions</label>
+                    <div className="input-group mb-3">
+                    { 
+                    <select multiple={true} name='fonctions' onChange={handleChange3} value={userData.fonctions}  ref={register}>
+                        {fonction.map(item =>{
+                            return (
+                                <option value={item.F}>{item.F}</option>
+                            )})}
+                            </select>
+                        }
                     </div>
                 </div>
                 <button onClick={()=> alert('Modifications enregistrées')} type="submit" class="btn btn-primary" >Enregistrer </button>
