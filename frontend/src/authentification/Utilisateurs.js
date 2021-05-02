@@ -108,7 +108,7 @@ export default function Utilisateurs({match}){
 
     function password(){
         const pass= generator.generate({
-            length:12,
+            length: 20,
             numbers: true,
             lowercase: true,
             uppercase: true,
@@ -175,12 +175,12 @@ export default function Utilisateurs({match}){
                     <input type="hidden" name='id' value={userData.id} ref={register}/>
                     <div>
                     <label  for ="utilisateur">Nom utilisateur</label>
-                    <input class="form-control" onChange={handleChange} value={userData.utilisateur} id="utilisateur" name="utilisateur" type="text" autocomplete='off' ref={register({ required: true })}/>
+                    <input class="form-control" onChange={handleChange} value={userData.utilisateur} id="utilisateur" name="utilisateur" type="text" autoComplete='off' ref={register({ required: true })}/>
                     
                     </div>
                     <div>
                        <label for="identifiant"> Créer un identifiant</label>
-                       <input class="form-control" onChange={handleChange} onBlur={onBlur} value={userData.identifiant} id="identifiant" name="identifiant" type="text" autocomplete='off' ref={register({ required: true })}/>
+                       <input class="form-control" onChange={handleChange} onBlur={onBlur} value={userData.identifiant} id="identifiant" name="identifiant" type="text" autoComplete='off' ref={register({ required: true })}/>
                     </div>
                     
                     {alerte && (
@@ -192,7 +192,7 @@ export default function Utilisateurs({match}){
                     <label for="pwd"> Créer un mot de passe</label>
 
                     <div className="input-group mb-3">
-                        <input autocomplete='off' class="form-control" onChange={handleChange} value={userData.pwd} name="pwd" id="pwd"  ref={register({ required: true })} />
+                        <input autoComplete='off' class="form-control" onChange={handleChange} value={userData.pwd} name="pwd" id="pwd"  ref={register({ required: true })} />
                         <div className="input-group-append">
                             <button className="btn btn-outline-secondary" type="button" onClick={onClick}> Générer</button>
                         </div>

@@ -36,7 +36,7 @@ export default function AjoutFonction(){
         
                 <div style={{'marginTop':'20px'}} class="form-group">
                     <label for="namefct">Nom de la fonction</label>
-                    <input type="text" className="form-control" id="namefct" name='name'  placeholder="insérer un nom" ref={register}/>
+                    <input autoComplete='off' type="text" className="form-control" id="namefct" name='name'  placeholder="insérer un nom" ref={register}/>
                 </div>
                 <div class="form-group">
                     <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
@@ -54,7 +54,7 @@ export default function AjoutFonction(){
                 
                 <div class="form-group">
                     <label for="proc">Insérer la fonction table </label>
-                    <textarea type="text" className="form-control" id="proc" name='fonction' placeholder="insérer la requête SQL" ref={register}></textarea>
+                    <textarea autoComplete='off' type="text" className="form-control" id="proc" name='fonction' placeholder="insérer la requête SQL" ref={register}></textarea>
                 </div>
         
                 <button onClick={()=>alert('Opération réussie')} type="submit" className="btn btn-primary">Enregistrer</button>

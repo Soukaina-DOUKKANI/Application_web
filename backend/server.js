@@ -6,6 +6,7 @@ var sql = require('mssql');
 var moment= require('moment');
 var jwt= require('jsonwebtoken');
 var bcrypt= require('bcrypt');
+const { Client } = require('@elastic/elasticsearch')
 
 app.use(express.json())
 
@@ -13,8 +14,21 @@ var cors = require('cors');
 
 app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
 
+const client = new Client({ 
+    node: 'http://localhost:9200', 
+    
+})
 
-// configuration de la BDD SQL SERVER 
+client.ping({}, { requestTimeout: 20000 }, (err, response) => {
+    if (err){
+        console.log(err)
+    }
+    else{
+        console.log('connected to elasticsearch')
+    }
+})
+
+// configuration de  SQL SERVER 
 var config = {
     server: "localhost\\MSSQLSERVER",
     database: "GI_BVC_DTM",
@@ -27,12 +41,13 @@ var config = {
     },
 };
 
-//connexion a la BDD
+//connexion a Sql server
 sql.connect(config, function (err) {
     if (err) {
         console.log(err);
         return;
     }
+
 
 
 // Enregistrement des comptes Utilisateurs
@@ -206,6 +221,30 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
             }
         }
     })
+})
+
+//search bar elasticsearch 
+app.post('/search', function(req,res){
+    search=req.body.search
+    client.search({
+        index: 'gi_bvc_dtm',
+        body:{
+            query: {
+                match: {"Secteur":  search}
+              },
+
+        }
+    },
+    function(error,data){
+        if (error){
+            console.log(error)
+        }
+        else{
+            console.log(data)
+            res.send(data)
+        }
+    }) 
+
 })
 //Utilisateurs : Affichage de la liste des utilisateurs, affichage des procedures stockees
 
@@ -823,7 +862,6 @@ app.post('/setGraph/:proc', function(req,res){
 app.post('/set_function', function(req,res){
     const request=new sql.Request();
     let query_ = `SELECT * FROM `;
-    console.log(req.body.nameProc)
     request.input('procedure', sql.Text, req.body.nameProc);
     query_ += `${req.body.nameProc} (`; 
     
@@ -849,7 +887,6 @@ app.post('/set_function', function(req,res){
     if (query_.slice(-1)!=')'){
         query_ += ' )'
     }
-    console.log(query_)
 
     request.query(query_, function(err, result){
         if(err){

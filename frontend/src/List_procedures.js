@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import {Link} from "react-router-dom"
 import {LoginContext} from './LoginContext';
 import "./styles/Design.css";
- 
+ import {useForm} from 'react-hook-form';
 
 export default function List_procedures(){
 
@@ -18,7 +18,9 @@ export default function List_procedures(){
     const [allData, setAllData]=useState([]);
     const [bdd,setBDD]=useState([]);
     const [baseDD, setBaseDD]=useState('BDD');
-    
+    const {handleSubmit,register}=useForm();
+    const[searchData, setSearchData]=useState();
+
     useEffect(()=>{
         Axios(setUser).get('http://localhost:4000/BDD')
         .then (result =>setBDD(result.data))
@@ -58,12 +60,23 @@ export default function List_procedures(){
         setFct(e.target.checked)
     }
     
-   
+   const onSubmit=(searchData)=>{
+       Axios(setUser).post('http://localhost:4000/search',searchData)
+       .then(result=>setSearchData(result.data))
+       .catch(err=>console.log(err))
+   }
 
     return(
         <div  className="container flex-column pas-rel">
             {(user.role=='admin')&&
             <div>
+            <div style={{'marginTop': '20px'}}>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    
+                   <input type='text' placeholder='search bar' name='search' ref={register}/> 
+                   <button className='btn btn-success' type='submit' >Rechercher</button>
+                </form>
+            </div>
             <h2>Choisir la base de données</h2>
             <div class="form-group">
                     <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
