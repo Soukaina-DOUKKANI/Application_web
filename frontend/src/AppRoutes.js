@@ -49,8 +49,8 @@ export default function AppRoutes(){
                 <ProtectedRoutes path="/Lister_utilisateurs" exact component={Lister_utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path="/Utilisateurs" exact component={Utilisateurs} role={['admin']}/>
                 <ProtectedRoutes path="/Utilisateurs/:id" exact component={Utilisateurs} role={['admin']}/>
-                <ProtectedRoutes path= "/Details_procedure/:name" exact component={Details_procedures} role={['admin']}/>
-                <ProtectedRoutes path= "/Details_fonction/:name" exact component={Details_fonction} role={['admin']}/>
+                <ProtectedRoutes path= "/Details_procedure/:name/:baseDD" exact component={Details_procedures} role={['admin']}/>
+                <ProtectedRoutes path= "/Details_fonction/:name/:baseDD" exact component={Details_fonction} role={['admin']}/>
                 <ProtectedRoutes path= "/Interface_utilisateur/:proc" exact component={Interface_utilisateur} role={['user']}/>
                 <ProtectedRoutes path= "/Interface_utilisateur2/:fct" exact component={Interface_utilisateur2} role={['user']}/>
                 <ProtectedRoutes path= "/GrapheParametres/:proc" exact component={GrapheParametres} role={['admin']}/>

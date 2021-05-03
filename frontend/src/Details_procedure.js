@@ -13,7 +13,7 @@ export default function Details_procedures({match}){
 
   
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/page1/${match.params.name}`).then(result => setData(result.data))
+        Axios(setUser).get(`http://localhost:4000/page1/${match.params.name}/${match.params.baseDD}`).then(result => setData(result.data))
         .catch(err => console.log(err));  
           
     }, []); 
@@ -21,7 +21,7 @@ export default function Details_procedures({match}){
     
     
     const onSubmit = (formData)=>{
-        Axios(setUser).post(`http://localhost:4000/set_data/${match.params.name}`, formData)
+        Axios(setUser).post(`http://localhost:4000/set_data/${match.params.name}/${match.params.baseDD}`, formData)
         .then (result => console.log(result))
         .catch(err => console.log(err));  
         console.log(JSON.stringify(formData))
@@ -38,6 +38,7 @@ export default function Details_procedures({match}){
         
             <tbody>
                 <tr>
+                    <input type="hidden" value= {match.params.baseDD} name="bdd" ref={register}/>
                    <th>NOM DE LA PROCEDURE</th> 
                    <td>
                     <input  name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  

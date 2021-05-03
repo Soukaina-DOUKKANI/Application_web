@@ -13,7 +13,7 @@ export default function Details_fonction({match}){
 
   
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/page_fct/${match.params.name}`).then(result => setData(result.data))
+        Axios(setUser).get(`http://localhost:4000/page_fct/${match.params.name}/${match.params.baseDD}`).then(result => setData(result.data))
         .catch(err => console.log(err));  
           
     }, []); 
@@ -21,7 +21,7 @@ export default function Details_fonction({match}){
     
     
     const onSubmit = (formData)=>{
-        Axios(setUser).post(`http://localhost:4000/set_data_fct/${match.params.name}`, formData)
+        Axios(setUser).post(`http://localhost:4000/set_data_fct/${match.params.name}/${match.params.baseDD}`, formData)
         .then (result => console.log(result))
         .catch(err => console.log(err));  
         console.log(JSON.stringify(formData))
@@ -38,9 +38,11 @@ export default function Details_fonction({match}){
         
             <tbody>
                 <tr>
+                    <input type="hidden" value= {match.params.baseDD} name="bdd" ref={register}/>
                    <th>NOM DE LA FONCTION</th> 
                    <td>
                     <input  name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
+
                    </td>
                 </tr>
                 <tr>

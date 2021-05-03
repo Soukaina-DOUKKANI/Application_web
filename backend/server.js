@@ -31,7 +31,6 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
 // configuration de  SQL SERVER 
 var config = {
     server: "localhost\\MSSQLSERVER",
-    database: "GI_BVC_DTM",
     user: "soukaina",
     password: "souka-23",
     port: 1433,
@@ -67,7 +66,6 @@ app.post('/users', function(req,res){
 
         }
         else{
-
             request.input("id", sql.Int, id);
             request.input("utilisateur", sql.Text, utilisateur);
             request.input("identifiant", sql.Text, identifiant);
@@ -76,40 +74,43 @@ app.post('/users', function(req,res){
             request.input("procedures", sql.Text, procedures);
             request.input("fonctions", sql.Text, fonctions);
 
+            request.query(`use APP_WEB_DATA`, function(err,results){
+                if(err){console.log(err)}
+                else{
+                    request.query(`select * from Comptes_Utilisateurs where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant `, function(err, result) {
+                        if(err){
+                            console.log(err);
+                            return (err);
+                            
+                        }
+                        else {
+                            if (!result.recordset.length){
+                                request.query( `insert into Comptes_Utilisateurs (  nom_utilisateur, identifiant, pwd, hash, role, procedures, fonctions) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures, @fonctions)`, function (err, insert){
+                                    if (err){
+                                        console.log(err);
+                                        return(err);
+                                    }
+                                    else {
+                                        res.send('success, insert user')
+                                    }
 
-            request.query(`select * from Users where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant `, function(err, result) {
-                if(err){
-                    console.log(err);
-                    return (err);
-                    
-                }
-                else {
-                    if (!result.recordset.length){
-                        request.query( `insert into Users (  nom_utilisateur, identifiant, pwd, hash, role, procedures, fonctions) values ( @utilisateur, @identifiant, @pwd, @hash, 'user', @procedures, @fonctions)`, function (err, insert){
-                            if (err){
-                                console.log(err);
-                                return(err);
+                                })
                             }
-                            else {
-                                res.send('success, insert user')
+                            else{
+                                request.query(`UPDATE Comptes_Utilisateurs SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures, fonctions=@fonctions
+                                where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant ` , function(err, update){
+                                    if (err){
+                                        console.log(err);
+                                        return(err);
+                                    }
+                                    else {
+                                        res.send('success, update user ')
                             }
 
                         })
                     }
-                    else{
-                        request.query(`UPDATE Users SET nom_utilisateur=@utilisateur, identifiant=@identifiant, pwd=@pwd, hash=@hash,  role='user', procedures=@procedures, fonctions=@fonctions
-                        where ID=@id and nom_utilisateur like @utilisateur and  identifiant like @identifiant ` , function(err, update){
-                            if (err){
-                                console.log(err);
-                                return(err);
-                            }
-                            else {
-                                res.send('success, update user ')
-                    }
-
-                })
-            }
-            
+                }  
+            })         
         }
         });
 
@@ -125,37 +126,42 @@ app.post('/connexion', function (req,res) {
     
     request.input('identifiant', sql.Text, identifiant);
     request.input('pwd', sql.Text, pwd);
-
-    request.query('select * from Users where identifiant like @identifiant and pwd like @pwd ', function(err, result){
-        if(err){
-            console.log(err);
-            return err;
-        }
-        
+    
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            if(result.recordset.length > 0){
-                bcrypt.compare(pwd, result.recordset[0].hash ,  (error, response)=>{
-                    if (response){
-                        const id=result.recordset[0].ID;
-                        const role=result.recordset[0].role;
-                        const values={id,role}
-                        const token= jwt.sign(values, "jwtSecret", {expiresIn: 60*60*4})
-                        res.json( { auth: true, token:token , response: {id, role}})
+            request.query('select * from Comptes_Utilisateurs where identifiant like @identifiant and pwd like @pwd ', function(err, result){
+                if(err){
+                    console.log(err);
+                    return err;
+                }
+                
+                else{
+                    if(result.recordset.length > 0){
+                        bcrypt.compare(pwd, result.recordset[0].hash ,  (error, response)=>{
+                            if (response){
+                                const id=result.recordset[0].ID;
+                                const role=result.recordset[0].role;
+                                const values={id,role}
+                                const token= jwt.sign(values, "jwtSecret", {expiresIn: 60*60*4})
+                                res.json( { auth: true, token:token , response: {id, role}})
 
+                            }
+                            else{
+                                res.json({auth: false, message: 'wrong pwd'})
+                            }
+
+                        })
+                        
                     }
                     else{
-                        res.json({auth: false, message: 'wrong pwd'})
+                        res.json({auth: false, message: 'wrong pwd/id combination'})
+
                     }
-
-                })
-                
-            }
-            else{
-                res.json({auth: false, message: 'wrong pwd/id combination'})
-
-            }
-        }    
-    });    
+                }    
+            });   
+        }
+    }) 
 });
 
 
@@ -188,8 +194,6 @@ const verifyJwt = (req,res,next) =>{
 
 app.use(verifyJwt)
 
-
-
 //Validate connexion
 app.get('/IsConnected', function(req,res){
      res.send({isLoggedIn: true, role:req.roleUser})
@@ -204,21 +208,26 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
     
     request.input('identifiant', sql.Text, identifiant)
     request.input('id', sql.Int, id)
-
-    request.query('select identifiant from Users where identifiant like @identifiant and id!=@id ', function(err, result) {
-
-        if (err){
-            console.log(err)
-            return err
-
-        }
+    
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            if(result.recordset.length){
-                res.send('abort')
-            }
-            else{
-                res.send('proceed')
-            }
+            request.query('select identifiant from Comptes_Utilisateurs where identifiant like @identifiant and id!=@id ', function(err, result) {
+
+                if (err){
+                    console.log(err)
+                    return err
+
+                }
+                else{
+                    if(result.recordset.length){
+                        res.send('abort')
+                    }
+                    else{
+                        res.send('proceed')
+                    }
+                }
+            })
         }
     })
 })
@@ -251,13 +260,18 @@ app.post('/search', function(req,res){
 app.get('/list_users', function(req,res){
     var request= new sql.Request();
 
-    request.query(`select ID, nom_utilisateur, identifiant from Users where role like 'user' `, function(err,result){
-        if(err){
-            console.log(err);
-            return err;
-        }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            res.send(result.recordset);
+            request.query(`select ID, nom_utilisateur, identifiant from Comptes_Utilisateurs where role like 'user' `, function(err,result){
+                if(err){
+                    console.log(err);
+                    return err;
+                }
+                else{
+                    res.send(result.recordset);
+                }
+            })
         }
     })
 })
@@ -266,13 +280,18 @@ app.get('/list_users', function(req,res){
 app.get('/get_user/:id', function(req,res){
     var request= new sql.Request();
     var id=req.params.id;
-    request.query(`select * from Users where ID=${id} `, function(err,result){
-        if(err){
-            console.log(err);
-            return err;
-        }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            res.send(result.recordset[0]);
+            request.query(`select * from Comptes_Utilisateurs where ID=${id} `, function(err,result){
+                if(err){
+                    console.log(err);
+                    return err;
+                }
+                else{
+                    res.send(result.recordset[0]);
+                }
+            })
         }
     })
 })
@@ -280,7 +299,7 @@ app.get('/get_user/:id', function(req,res){
 //Get BDD
 app.get('/BDD', function(req,res){
     const request= new sql.Request()
-    request.query(`SELECT name as bdd FROM sysdatabases WHERE name NOT IN('master', 'tempdb', 'model', 'msdb') `, function(err, result){
+    request.query(`SELECT name as bdd FROM sysdatabases WHERE name NOT IN('master', 'tempdb', 'model', 'msdb', 'APP_WEB_DATA') `, function(err, result){
         if(err){console.log(err)}
         else{
             res.send(result.recordset)
@@ -299,7 +318,7 @@ app.get('/List_procedures', function(req,res){
                     FROM ' + QUOTENAME(name) + '.sys.schemas AS S
                     INNER JOIN ' + QUOTENAME(name) + '.sys.procedures AS P
                     ON P.schema_id = S.schema_id;
-                    ' FROM sys.databases WHERE database_id > 4
+                    ' FROM sys.databases WHERE database_id > 5
                     EXEC sp_executesql @sql;
                     SELECT P FROM #x where LEFT(P, 3) NOT IN ('sp_', 'xp_', 'ms_') `, function(err,result){
                         if (err){console.log(err)}
@@ -323,7 +342,7 @@ app.get('/List_fonctions', function(req,res){
                     FROM ' + QUOTENAME(name) + '.sys.schemas AS s
                     INNER JOIN ' + QUOTENAME(name) + '.sys.Objects AS F
                     ON F.schema_id = s.schema_id;' 
-                    FROM sys.databases WHERE database_id > 4
+                    FROM sys.databases WHERE database_id > 5
                     
                     EXEC sp_executesql @sql;
                     
@@ -369,27 +388,31 @@ app.get('/appFonction/:baseDD', function(req,res){
             
         }
         else{
-            request.query(`SELECT fonctions as F from Users where ID=${id} `, function (err, results){
-                
-                if (err){
-                    console.log(err);
-                    return (err);
-                } 
-    
-                // afficher le resultat de la procedure 
+            request.query(`use APP_WEB_DATA`, function(err,results){
+                if(err){console.log(err)}
                 else{
-                    
-                    const proc=JSON.parse(results.recordset[0].F);
-                    const values=[]
-                    proc.map(item=>{
-                        values.push({'F':item})               
-                    })
-    
-                    res.send(values)
-    
+                    request.query(`SELECT fonctions as F from Comptes_Utilisateurs where ID=${id} `, function (err, results){
+                        
+                        if (err){
+                            console.log(err);
+                            return (err);
+                        } 
+            
+                        // afficher le resultat de la procedure 
+                        else{
+                            
+                            const proc=JSON.parse(results.recordset[0].F);
+                            const values=[]
+                            proc.map(item=>{
+                                values.push({'F':item})               
+                            })
+                            res.send(values)
+            
+                        }
+                    });
                 }
-        });
-    
+            })
+            
     }
   
 })
@@ -442,43 +465,47 @@ app.get('/allData/:baseDD', function (req, res) {
 
    }
    else{
-    request.query(`SELECT procedures as P from Users where ID=${id} `, function (err, results){
-        
-        if (err){
-            console.log(err);
-            return (err);
-        } 
-
-        // afficher le resultat de la procedure 
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-                request.query(`SELECT fonctions as F from Users where ID=${id} `, function (err, resultats){
-                    
-                    if (err){
-                        console.log(err);
-                        return (err);
-                    } 
-        
-                    // afficher le resultat de la procedure 
-                    else{
-                        
-                        const proc=JSON.parse(results.recordset[0].P);
-                        const fct=JSON.parse(resultats.recordset[0].F)
-                        const values=[]
-                        proc.map(item=>{
-                            values.push({'P':item})               
-                        })
+            request.query(`SELECT procedures as P from Comptes_Utilisateurs where ID=${id} `, function (err, results){
+                
+                if (err){
+                    console.log(err);
+                    return (err);
+                } 
 
-                        fct.map(item=>{
-                            values.push({'F':item})
-                        })
-        
-                        res.send(values)
-        
-                    }
-                });
-        
+                // afficher le resultat de la procedure 
+                else{
+                        request.query(`SELECT fonctions as F from Comptes_Utilisateurs where ID=${id} `, function (err, resultats){
+                            
+                            if (err){
+                                console.log(err);
+                                return (err);
+                            } 
+                
+                            // afficher le resultat de la procedure 
+                            else{
+                                
+                                const proc=JSON.parse(results.recordset[0].P);
+                                const fct=JSON.parse(resultats.recordset[0].F)
+                                const values=[]
+                                proc.map(item=>{
+                                    values.push({'P':item})               
+                                })
+
+                                fct.map(item=>{
+                                    values.push({'F':item})
+                                })
+                                res.send(values)
+                
+                            }
+                        });
+                
+                }
+            });
         }
-    });
+    })
 
    }
     
@@ -494,8 +521,8 @@ app.get('/appProcedure/:baseDD', function (req, res) {
         const bdd=req.params.baseDD;
 
        // liste des  procedures stockees
-       if(role=='admin'){
-           request.query(`use ${bdd}`, function(err,results){
+        if(role=='admin'){
+            request.query(`use ${bdd}`, function(err,results){
                if(err){console.log(err)}
                else{
                 request.query(`SELECT SPECIFIC_NAME as P FROM INFORMATION_SCHEMA.ROUTINES WHERE SPECIFIC_CATALOG='${bdd}' AND ROUTINE_TYPE = 'PROCEDURE' AND LEFT(ROUTINE_NAME, 3) NOT IN ('sp_', 'xp_', 'ms_') `, function (err, results){
@@ -512,31 +539,34 @@ app.get('/appProcedure/:baseDD', function (req, res) {
                 });
 
                }
-           })
-            
-
-       }
+            })
+        }
         else{
-        request.query(`SELECT procedures as P from Users where ID=${id} `, function (err, results){
             
-            if (err){
-                console.log(err);
-                return (err);
-            } 
+            request.query(`use APP_WEB_DATA`, function(err,results){
+                if(err){console.log(err)}
+                else{
+                    request.query(`SELECT procedures as P from Comptes_Utilisateurs where ID=${id} `, function (err, results){
+                        
+                        if (err){
+                            console.log('ERROR2',err);
+                            return (err);
+                        } 
 
-            // afficher le resultat de la procedure 
-            else{
-                
-                const proc=JSON.parse(results.recordset[0].P);
-                const values=[]
-                proc.map(item=>{
-                    values.push({'P':item})               
-                })
+                        // afficher le resultat de la procedure 
+                        else{
+                            
+                            const proc=JSON.parse(results.recordset[0].P);
+                            const values=[]
+                            proc.map(item=>{
+                                values.push({'P':item})               
+                            })
+                            res.send(values)
 
-                res.send(values)
-
-            }
-        });
+                        }
+                    });
+                }
+            })
 
        }
         
@@ -548,7 +578,7 @@ app.get('/appProcedure/:baseDD', function (req, res) {
 
 //Metadata des procedures stockees
 
-app.get('/page1/:name', function (req, res) {
+app.get('/page1/:name/:baseDD', function (req, res) {
        // liste des  procedures stockees
        var name =req.params.name;
         var request = new sql.Request();
@@ -593,7 +623,7 @@ app.get('/page1/:name', function (req, res) {
 
 //Metadata des fonctions tables
 
-app.get('/page_fct/:name', function (req, res) {
+app.get('/page_fct/:name/:baseDD', function (req, res) {
     // liste des  procedures stockees
     var name =req.params.name;
      var request = new sql.Request();
@@ -615,7 +645,7 @@ app.get('/page_fct/:name', function (req, res) {
      join INFORMATION_SCHEMA.ROUTINES R
      on P.SPECIFIC_NAME= R.SPECIFIC_NAME
      where R.ROUTINE_TYPE = 'function'
-     AND LEFT(R.ROUTINE_NAME, 3) NOT IN ('xp_', 'ms_', 'fn_')
+     AND LEFT(R.ROUTINE_NAME, 3) NOT IN ( 'fn_')
      AND R.ROUTINE_NAME='${name}'
      order by R.CREATED`, function (err, results){
          if (err) {
@@ -637,92 +667,104 @@ app.get('/page_fct/:name', function (req, res) {
 });
 
 //interface user  function
-app.post('/set_data_fct/:name', function(req,res){
+app.post('/set_data_fct/:name/:baseDD', function(req,res){
     var name =req.params.name;
+    var baseDD =req.params.baseDD;
     const request=new sql.Request();
     request.input('data', sql.Text, JSON.stringify(req.body))
     
-    request.query(`select * from Valeur_Ajuste where functionName like '${name}'`, function(err, result) {
-        if(err){
-            console.log(err);
-            return (err);
-            
-        }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into Valeur_Ajuste (functionName,functionData) values ( '${name}', @data)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert')
-                    }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select * from Parametrage_Interface_Utilisateur where functionName like '${name}'`, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Parametrage_Interface_Utilisateur (functionName,databaseNamefct,functionData) values ( '${name}','${baseDD}', @data)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert')
+                            }
 
-                })
-            }
-            else{
-                request.query(`UPDATE Valeur_Ajuste SET functionName='${name}', functionData=@data 
-                where functionName like '${name}'` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
+                        })
                     }
-                    else {
-                        res.send('success, update ')
-                    }
+                    else{
+                        request.query(`UPDATE Parametrage_Interface_Utilisateur SET functionName='${name}',databaseNamefct='${baseDD}', functionData=@data 
+                        where functionName like '${name}'` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update ')
+                            }
 
-                })
-            }
-            
+                        })
+                    }
+                    
+                }
+            });
         }
-        });
+    })
 
 
 });
 
 
 //interface user 
-app.post('/set_data/:name', function(req,res){
+app.post('/set_data/:name/:baseDD', function(req,res){
     var name =req.params.name;
+    var baseDD =req.params.baseDD;
     const request=new sql.Request();
     request.input('data', sql.Text, JSON.stringify(req.body))
     
-    request.query(`select * from Valeur_Ajuste where procedureName like '${name}'`, function(err, result) {
-        if(err){
-            console.log(err);
-            return (err);
-            
-        }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into Valeur_Ajuste (procedureName,formdata) values ( '${name}', @data)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert')
-                    }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select * from Parametrage_Interface_Utilisateur where procedureName like '${name}'`, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Parametrage_Interface_Utilisateur (procedureName,databaseName,procedureData) values ( '${name}','${baseDD}', @data)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert')
+                            }
 
-                })
-            }
-            else{
-                request.query(`UPDATE Valeur_Ajuste SET procedureName='${name}', formdata=@data 
-                where procedureName like '${name}'` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
+                        })
                     }
-                    else {
-                        res.send('success, update ')
-                    }
+                    else{
+                        request.query(`UPDATE Parametrage_Interface_Utilisateur SET procedureName='${name}',databaseName='${baseDD}', procedureData=@data 
+                        where procedureName like '${name}'` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update ')
+                            }
 
-                })
-            }
-            
+                        })
+                    }
+                    
+                }
+            });
         }
-        });
+    })
 
 
 });
@@ -731,6 +773,17 @@ app.post('/set_data/:name', function(req,res){
 app.get ('/Get_options/:requete', function(req, res){
     const request= new sql.Request();
     const requete=req.params.requete;
+    const statement=['update','insert','delete','drop','truncate','create','alter','backup']
+    const split=requete.split(' ')
+    for (let val in statement){
+        if(split[0].toLowerCase()===val){
+            res.send('request not allowed')
+        }
+        else{
+            continue;
+        }
+        
+    }
     request.query(requete, function(err, result){
         if(err){
             console.log(err);
@@ -740,21 +793,27 @@ app.get ('/Get_options/:requete', function(req, res){
             res.send(result.recordset);
         }
     })
+    
 })
 //affichage interface user graphe parametres procedure
 app.get('/Get_values/:proc', function (req,res){
     const request= new sql.Request();
     var proc =req.params.proc;
-    request.query(`select formdata  from Valeur_Ajuste
-                    where procedureName like '${proc}' ` , function(err,values){
-        if (err){
-            console.log(err);
-            }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            const result= JSON.parse(values.recordset[0].formdata)
-            res.send(result);
-            }
-        });
+            request.query(`select procedureData  from Parametrage_Interface_Utilisateur
+                            where procedureName like '${proc}' ` , function(err,values){
+                if (err){
+                    console.log(err);
+                    }
+                else{
+                    const result= JSON.parse(values.recordset[0].procedureData)
+                    res.send(result);
+                    }
+            });
+        }
+    })
     
 })
 
@@ -762,23 +821,27 @@ app.get('/Get_values/:proc', function (req,res){
 app.get('/Get_values_fct/:fct', function (req,res){
     const request= new sql.Request();
     var fct =req.params.fct;
-    request.query(`select functionData  from Valeur_Ajuste
-                    where functionName like '${fct}' ` , function(err,values){
-        if (err){
-            console.log(err);
-            }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            const result= JSON.parse(values.recordset[0].functionData)
-            res.send(result);
-            }
-        });
-    
+            request.query(`select functionData  from Parametrage_Interface_Utilisateur
+                            where functionName like '${fct}' ` , function(err,values){
+                if (err){
+                    console.log(err);
+                    }
+                else{
+                    const result= JSON.parse(values.recordset[0].functionData)
+                    res.send(result);
+                    }
+            });
+        }
+    })
 })
 
 
 
 
-//Execution de la procedure stockee
+//Execution de la procedure stockee (***)
 app.post('/set_procedure', function(req,res){
     const request=new sql.Request();
     let query_ = 'Execute';
@@ -800,65 +863,77 @@ app.post('/set_procedure', function(req,res){
         }
     }
    
-    request.query(query_, function(err, result){
+    request.query(`use ${req.body.bdd}`, function(err, result){
         if(err){
             console.log(err);
         }
         else{
-            res.send(result.recordset);
+            request.query(query_, function(err, result){
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    res.send(result.recordset);
+                }
+            })
         }
     })
 
     
 })
 
-//Inserion des donnees du grqphe
+//Inserion des donnees du graphe
 app.post('/setGraph/:proc', function(req,res){
     const request=new sql.Request();
     const proc=req.params.proc;
     request.input('dataGraph', sql.Text, JSON.stringify(req.body))
     
-    request.query(`select * from Data_Graph where procedureName like '${proc}'  `, function(err, result) {
-        if(err){
-            console.log(err);
-            return (err);
-            
-        }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into Data_Graph (procedureName, dataGraph) values ('${proc}',@dataGraph)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert graph')
-                    }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select * from Parametrage_Graphe where procedureName like '${proc}'  `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Parametrage_Graphe (procedureName, dataGraph) values ('${proc}',@dataGraph)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert graph')
+                            }
 
-                })
-            }
-            else{
-                request.query(`UPDATE Data_Graph SET procedureName='${proc}', dataGraph=@dataGraph
-                where procedureName like '${proc}'` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
+                        })
                     }
-                    else {
-                        res.send('success, update graph ')
-                    }
+                    else{
+                        request.query(`UPDATE Parametrage_Graphe SET procedureName='${proc}', dataGraph=@dataGraph
+                        where procedureName like '${proc}'` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update graph ')
+                            }
 
-                })
-            }
-            
+                        })
+                    }
+                    
+                }
+            });
         }
-        });
+    })
 
 
 });
 
 
-//Execution de la fonction table
+//Execution de la fonction table (***)
 app.post('/set_function', function(req,res){
     const request=new sql.Request();
     let query_ = `SELECT * FROM `;
@@ -888,12 +963,19 @@ app.post('/set_function', function(req,res){
         query_ += ' )'
     }
 
-    request.query(query_, function(err, result){
+    request.query(`use ${req.body.bdd}`, function(err, result){
         if(err){
             console.log(err);
         }
         else{
-            res.send(result.recordset);
+            request.query(query_, function(err, result){
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    res.send(result.recordset);
+                }
+            })
         }
     })
 
@@ -904,61 +986,70 @@ app.post('/setGraphFct/:fct', function(req,res){
     const request=new sql.Request();
     const fct=req.params.fct;
     request.input('dataGraph', sql.Text, JSON.stringify(req.body))
-    console.log('ocococ',req.body)
-    request.query(`select * from Data_Graph where functionName like '${fct}'  `, function(err, result) {
+    request.query(`use APP_WEB_DATA`, function(err,results){
         if(err){
-            console.log(err);
-            return (err);
-            
+            console.log(err)
         }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into Data_Graph (functionName, dataGraphFct) values ('${fct}',@dataGraph)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert graph')
-                    }
+        else{
+            request.query(`select * from Parametrage_Graphe where functionName like '${fct}'  `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
+                }
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Parametrage_Graphe (functionName, dataGraphFct) values ('${fct}',@dataGraph)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert graph')
+                            }
 
-                })
-            }
-            else{
-                request.query(`UPDATE Data_Graph SET functionName='${fct}', dataGraphFct=@dataGraph
-                where functionName like '${fct}'` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
+                        })
                     }
-                    else {
-                        res.send('success, update graph ')
-                    }
+                    else{
+                        request.query(`UPDATE Parametrage_Graphe SET functionName='${fct}', dataGraphFct=@dataGraph
+                        where functionName like '${fct}'` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update graph')
+                            }
 
-                })
-            }
-            
+                        })
+                    }
+                    
+                }
+            });
         }
-        });
+    })
 
 
 });
-
-
 
 
 //get result of graph for procedures
 app.get('/getGraph/:name',function(req,res){
     const request= new sql.Request();
     const name=req.params.name;
-    request.query(`select dataGraph from Data_Graph where procedureName like '${name}' `, function(err,result){
-        if(err){
-            console.log(err);
-            return(err);
-        }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            const resGraph= JSON.parse(result.recordset[0].dataGraph)
-            res.send(resGraph);
+            request.query(`select dataGraph from Parametrage_Graphe where procedureName like '${name}' `, function(err,result){
+                if(err){
+                    console.log(err);
+                    return(err);
+                }
+                else{
+                    const resGraph= JSON.parse(result.recordset[0].dataGraph)
+                    res.send(resGraph);
+                }
+            })
         }
     })
 })
@@ -967,14 +1058,19 @@ app.get('/getGraph/:name',function(req,res){
 app.get('/getGraphFct/:name',function(req,res){
     const request= new sql.Request();
     const name=req.params.name;
-    request.query(`select dataGraphFct from Data_Graph where functionName like '${name}' `, function(err,result){
-        if(err){
-            console.log(err);
-            return(err);
-        }
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
         else{
-            const resGraph= JSON.parse(result.recordset[0].dataGraphFct)
-            res.send(resGraph);
+            request.query(`select dataGraphFct from Parametrage_Graphe where functionName like '${name}' `, function(err,result){
+                if(err){
+                    console.log(err);
+                    return(err);
+                }
+                else{
+                    const resGraph= JSON.parse(result.recordset[0].dataGraphFct)
+                    res.send(resGraph);
+                }
+            })
         }
     })
 })
@@ -988,53 +1084,58 @@ app.post('/AjoutProcedure', function(req,res){
     request.input('bdd', sql.Text, req.body.bdd)
     request.input('procedure', sql.Text, req.body.procedure)
     
-    request.query(`select * from procedures where nom_procedure like @name `, function(err, result) {
-        if(err){
-            console.log(err);
-            return (err);
-            
-        }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into procedures (nom_procedure, bdd, procedure_code) values (@name,@bdd, @procedure)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert proc')
-                    }
-
-                })
-            }
-            else{
-                request.query(`UPDATE procedures  SET nom_procedure=@name,bdd=@bdd, procedure_code=@procedure
-               
-                where nom_procedure like @name  ` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, update proc ')
-                    }
-
-                })
-            }
-            
-            
-        }
-        
-    });
-    let query_= 'execute SP_builder @procedure , @bdd'
-            request.query(query_ , function (err, result){
-
-                if (err) {console.log(err)}
-                else{
-                    console.log('success procedure creation')
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select * from Creation_Procedure where nom_procedure like @name `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
                 }
-    
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Creation_Procedure (nom_procedure, bdd, procedure_code) values (@name,@bdd, @procedure)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert proc')
+                            }
+
+                        })
+                    }
+                    else{
+                        request.query(`UPDATE Creation_Procedure  SET nom_procedure=@name,bdd=@bdd, procedure_code=@procedure
+                    
+                        where nom_procedure like @name  ` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update proc ')
+                            }
+
+                        })
+                    }
+                    
+                    
+                }
+                
             });
+            let query_= 'execute CREATE_PS_FCT_DYNAMIQUE @procedure , @bdd'
+                    request.query(query_ , function (err, result){
+
+                        if (err) {console.log(err)}
+                        else{
+                            console.log('success procedure creation')
+                        }
+            
+            });
+        }
+    })
 
 
 });
@@ -1047,54 +1148,52 @@ app.post('/AjoutFonction', function(req,res){
     request.input('bdd', sql.Text, req.body.bdd)
     request.input('fonction', sql.Text, req.body.fonction)
     
-    request.query(`select * from fonctions where nom_fonction like @name `, function(err, result) {
-        if(err){
-            console.log(err);
-            return (err);
-            
-        }
-        else {
-            if (!result.recordset.length){
-                request.query( `insert into fonctions (nom_fonction, bdd, fonction_code) values (@name,@bdd, @fonction)`, function (err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, insert fonction')
-                    }
-
-                })
-            }
-            else{
-                request.query(`UPDATE fonctions  SET nom_fonction=@name,bdd=@bdd, fonction_code=@fonction
-               
-                where nom_fonction like @name  ` , function(err){
-                    if (err){
-                        console.log(err);
-                        return(err);
-                    }
-                    else {
-                        res.send('success, update fonction')
-                    }
-
-                })
-            }
-            
-            
-        }
-        
-    });
-    let query_= 'execute SP_builder @fonction , @bdd'
-            request.query(query_ , function (err, result){
-
-                if (err) {console.log(err)}
-                else{
-                    console.log('success function creation')
-
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select * from Creation_Fonction where nom_fonction like @name `, function(err, result) {
+                if(err){
+                    console.log(err);
+                    return (err);
+                    
                 }
-    
+                else {
+                    if (!result.recordset.length){
+                        request.query( `insert into Creation_Fonction (nom_fonction, bdd, fonction_code) values (@name,@bdd, @fonction)`, function (err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, insert fonction')
+                            }
+
+                        })
+                    }
+                    else{
+                        request.query(`UPDATE Creation_Fonction  SET nom_fonction=@name,bdd=@bdd, fonction_code=@fonction
+                        where nom_fonction like @name  ` , function(err){
+                            if (err){
+                                console.log(err);
+                                return(err);
+                            }
+                            else {
+                                res.send('success, update fonction')
+                            }
+                        })
+                    }    
+                }
+                
             });
+            let query_= 'execute CREATE_PS_FCT_DYNAMIQUE @fonction , @bdd'
+                request.query(query_ , function (err, result){
+                    if (err) {console.log(err)}
+                    else{
+                        console.log('success function creation')
+                        }
+                });
+            }
+        })
 
 
 });

@@ -42,7 +42,6 @@ export default function List_procedures(){
         .catch(err => console.log(err));  
     }, [baseDD]);  
         
-
     const onChangeBDD=(e)=>{
        setBaseDD(e.target.value)
     }
@@ -74,11 +73,10 @@ export default function List_procedures(){
                 <form onSubmit={handleSubmit(onSubmit)}>
                     
                    <input type='text' placeholder='search bar' name='search' ref={register}/> 
-                   <button className='btn btn-success' type='submit' >Rechercher</button>
+                   <button style={{'marginLeft':'5px'}} className='btn btn-success' type='submit' >Rechercher</button>
                 </form>
             </div>
-            <h2>Choisir la base de données</h2>
-            <div class="form-group">
+            <div style={{'marginTop':'20px'}} class="form-group">
                     <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
                     <select  name = 'bdd'  onChange={onChangeBDD}>
                         {bdd.map(item =>{
@@ -121,7 +119,7 @@ export default function List_procedures(){
                                     return (
 
                                         <div  onClick={()=> setResult(item.P)}>
-                                        <Link to={`/Details_procedure/${item.P}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.P}</Link>
+                                        <Link to={`/Details_procedure/${item.P}/${baseDD}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.P}</Link>
                                         
                                         </div>
                                         
@@ -166,7 +164,7 @@ export default function List_procedures(){
                                     return (
 
                                         <div  onClick={()=> setResult(item.F)}>
-                                        <Link to={`/Details_fonction/${item.F}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.F}</Link>
+                                        <Link to={`/Details_fonction/${item.F}/${baseDD}`} className="list-group-item  list-group-item-action list-group-item-light " style={{"color":"black"}} > {item.F}</Link>
                                         
                                         </div>
                                         

@@ -15,7 +15,7 @@ export default function GrapheParametre({match}){
     const [data, setData]= useState({});
     const [graph, setGraph]= useState([]);
     const [chartData, setChartData]=useState({});
-    
+    const [bdd, setBDD]=useState([])
     
         
     const onChartSubmit =(chartData)=>{
@@ -26,7 +26,12 @@ export default function GrapheParametre({match}){
         .catch(err => console.log(err));  
     }
 
-    
+    useEffect(()=>{
+        Axios(setUser).get('http://localhost:4000/BDD')
+        .then (result => setBDD(result.data))
+        .catch(err => console.log(err));  
+        
+    },[])
 
     const onSubmit =(df)=>{
        
@@ -81,6 +86,15 @@ export default function GrapheParametre({match}){
                              <div >
                              <h2 > {data[key]}  </h2>
                              <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
+                             <div class="form-group">
+                                <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
+                                <select  name ='bdd' type='text' ref={register}>
+                                    {bdd.map(item =>{
+                                    return (
+                                            <option value={item.bdd}>{item.bdd}</option>
+                                    )})}
+                                </select>
+                             </div>
                              </div> 
                              )
                      }

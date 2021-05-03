@@ -45,9 +45,13 @@ export default function Interface_utilisateur({match}){
             {
                 
                 Object.keys(data).map((key ) =>{
+                    if(key=='bdd'){
+                        return(
+                            <input type='hidden' name='bdd' value={data[key]} ref={register} />
+                        )
+                    }
                     if (key=='procedure'){
                         return(
-                            
                             <div >
                             <h2 > {data[key]}  </h2>
                             <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
