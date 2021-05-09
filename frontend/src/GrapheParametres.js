@@ -72,6 +72,7 @@ export default function GrapheParametre({match}){
     ]
     
     console.log('result',graph[0])
+    console.log('data',data)
 
     return (
         <div className="container"> 
@@ -86,23 +87,19 @@ export default function GrapheParametre({match}){
                              <div >
                              <h2 > {data[key]}  </h2>
                              <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
-                             <div class="form-group">
-                                <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
-                                <select  name ='bdd' type='text' ref={register}>
-                                    {bdd.map(item =>{
-                                    return (
-                                            <option value={item.bdd}>{item.bdd}</option>
-                                    )})}
-                                </select>
-                             </div>
                              </div> 
                              )
                      }
+                    if(key=='bdd'){
+                         return(
+                             <input type='hidden' value={data[key]} name='bdd' ref={register} />
+                        )
+                    }
                      if (key.charAt(0)=="@"){
                          return(
                              <div className="row"  > 
                                  <span style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </span>  
-                                 <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
+                                 <Parametre type={key} bdd={data['bdd']} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
                              </div>)
                      } 
                      

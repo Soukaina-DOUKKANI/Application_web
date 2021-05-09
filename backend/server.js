@@ -31,6 +31,7 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
 // configuration de  SQL SERVER 
 var config = {
     server: "localhost\\MSSQLSERVER",
+    database:"APP_WEB_DATA",
     user: "soukaina",
     password: "souka-23",
     port: 1433,
@@ -192,6 +193,7 @@ const verifyJwt = (req,res,next) =>{
 
 }
 
+// use middleware verifyJwt
 app.use(verifyJwt)
 
 //Validate connexion
@@ -234,14 +236,19 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
 
 //search bar elasticsearch 
 app.post('/search', function(req,res){
-    search=req.body.search
+    const search=req.body.search
     client.search({
-        index: 'gi_bvc_dtm',
+        index: 'meta',
         body:{
             query: {
-                match: {"Secteur":  search}
-              },
-
+                multi_match: {
+                    query: search,
+                    fuzziness: "auto",
+                    fuzzy_transpositions: true,
+                    max_expansions: 50,
+                    prefix_length: 1
+                }
+            },     
         }
     },
     function(error,data){
@@ -249,12 +256,23 @@ app.post('/search', function(req,res){
             console.log(error)
         }
         else{
-            console.log(data)
-            res.send(data)
+           //console.log(data.body.hits.hits)
+            const result=[]
+            const obj_search=data.body.hits.hits
+            obj_search.map(item=>{
+                Object.keys(item).map(key=>{
+                    if(key=='_source'){
+                        result.push(item[key])
+                    }
+                })
+                
+            })
+            res.send(result)
         }
     }) 
 
 })
+
 //Utilisateurs : Affichage de la liste des utilisateurs, affichage des procedures stockees
 
 app.get('/list_users', function(req,res){
@@ -770,13 +788,15 @@ app.post('/set_data/:name/:baseDD', function(req,res){
 });
 
 //execution requete de la liste box 
-app.get ('/Get_options/:requete', function(req, res){
+app.get ('/Get_options/:requete/:bdd', function(req, res){
     const request= new sql.Request();
     const requete=req.params.requete;
+    const bdd=req.params.bdd;
     const statement=['update','insert','delete','drop','truncate','create','alter','backup']
     const split=requete.split(' ')
     for (let val in statement){
-        if(split[0].toLowerCase()===val){
+        console.log(statement[val])
+        if(split[0].toLowerCase()=== statement[val]){
             res.send('request not allowed')
         }
         else{
@@ -784,13 +804,20 @@ app.get ('/Get_options/:requete', function(req, res){
         }
         
     }
-    request.query(requete, function(err, result){
+
+    request.query(`use ${bdd}`, function(err, result){
         if(err){
             console.log(err);
-            return(err);
         }
         else{
-            res.send(result.recordset);
+            request.query(requete, function(err, result){
+                if(err){
+                    console.log(err);
+                }
+                else{
+                    res.send(result.recordset);
+                }
+            })
         }
     })
     

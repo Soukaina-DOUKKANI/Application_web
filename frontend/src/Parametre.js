@@ -6,7 +6,7 @@ import Axios from './AxiosInstance';
 import { Controller} from "react-hook-form";
 
 
-export default function  Parametre({type, valeur, requete, register, control, setValue}) {
+export default function  Parametre({type, valeur,bdd, requete, register, control, setValue}) {
     
     const isDate= (type.toLowerCase()=='@date_in')? true : false; 
     const isValue=(valeur!=="")? true : false;
@@ -18,7 +18,7 @@ export default function  Parametre({type, valeur, requete, register, control, se
 
     useEffect(() => {  
         if (!isDate && !isValue){
-            Axios(setUser).get(`http://localhost:4000/Get_options/${requete}`)
+            Axios(setUser).get(`http://localhost:4000/Get_options/${requete}/${bdd}`)
             .then(result => setValues(result.data))
             .catch(err => console.log(err));  
 

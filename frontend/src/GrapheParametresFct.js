@@ -90,18 +90,14 @@ export default function GrapheParametreFct({match}){
                              <div >
                              <h2 > {data[key]}  </h2>
                              <input type="hidden" value= {match.params.fct} name="nameProc" ref={register}/>
-                             <div class="form-group">
-                                <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
-                                <select  name ='bdd' type='text' ref={register}>
-                                    {bdd.map(item =>{
-                                    return (
-                                            <option value={item.bdd}>{item.bdd}</option>
-                                    )})}
-                                </select>
-                             </div>
                              </div> 
                              )
                      }
+                     if(key=='bdd'){
+                        return(
+                            <input type='hidden' value={data[key]} name='bdd' ref={register} />
+                       )
+                    }
                      if (key.charAt(0)=="@"){
                          return(
                              <div className="row"  > 
