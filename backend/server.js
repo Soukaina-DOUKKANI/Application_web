@@ -238,7 +238,7 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
 app.post('/search', function(req,res){
     const search=req.body.search
     client.search({
-        index: 'meta',
+        index: 'metadonnees',
         body:{
             query: {
                 multi_match: {
