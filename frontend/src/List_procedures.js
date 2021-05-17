@@ -92,7 +92,7 @@ export default function List_procedures(){
                 </form>
             </div>
             <div styles={{'marginTop':'10px'}} className="container">
-            {(searchData.length>0) &&
+            {(searchData.length>0) && (searchData[0].table_name)  &&
             <table class="table table-bordered ">
                             <thead>
                             <tr>
@@ -101,6 +101,7 @@ export default function List_procedures(){
                                 <th>table_Description</th>
                                 <th>column_name</th>
                                 <th>column_type</th>
+                                
                             </tr>
                             </thead>
                 {searchData.map(item=>{
@@ -112,11 +113,39 @@ export default function List_procedures(){
                                 <td>{item.table_description}</td>
                                 <td>{item.column_name}</td>
                                 <td>{item.column_type}</td>
+                                
                                  
                             </tr>
                             </tbody>
+                        )   
+                })
+                }
+            </table>
+            }
+            {(searchData.length>0) && (searchData[0].valeur)  &&
+                <table class="table table-bordered ">
+                <thead>
+                    <tr>
+                        <th>Nom_entreprise</th>
+                        <th>Secteur d'activité</th>
+                        <th>Domaine</th>
+                        <th>Description</th>
                         
-                    )
+                    </tr>
+                </thead>
+                {searchData.map(item=>{
+                    return(
+                            <tbody>
+                            <tr>
+                                
+                                <td>{item.valeur}</td>
+                                <td>{item.secteur_activite}</td>
+                                <td>{item.gics_sector_fr}</td>
+                                <td>{item.description}</td>
+                                 
+                            </tr>
+                            </tbody>
+                        )   
                 })
                 }
             </table>
@@ -296,11 +325,8 @@ export default function List_procedures(){
                           
                            </div> 
                         
-                        )}
-                        
-                        
+                        )}    
                     </div>
-
                 )
                 }
             </div>

@@ -238,11 +238,12 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
 app.post('/search', function(req,res){
     const search=req.body.search
     client.search({
-        index: 'metadonnees',
+        index: ['metadonnees','tables4'],
         body:{
             query: {
                 multi_match: {
                     query: search,
+                    operator:"and",
                     fuzziness: "auto",
                     fuzzy_transpositions: true,
                     max_expansions: 50,
@@ -250,13 +251,11 @@ app.post('/search', function(req,res){
                 }
             },     
         }
-    },
-    function(error,data){
+    },function(error,data){
         if (error){
             console.log(error)
         }
         else{
-           //console.log(data.body.hits.hits)
             const result=[]
             const obj_search=data.body.hits.hits
             obj_search.map(item=>{
@@ -270,6 +269,8 @@ app.post('/search', function(req,res){
             res.send(result)
         }
     }) 
+
+    
 
 })
 
