@@ -19,7 +19,7 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
 
 /*
 client.indices.create({
-    index: 'tables2'
+    index: 'tables5'
     
 }, function(error, response, status) {
     if (error) {
@@ -34,29 +34,33 @@ client.indices.create({
 
 
 client.indices.putSettings({
-    index:'tables2',
+    index:'tables5',
     body:{
         analysis:{
-            filter:{
-                autocomplete_filter:{
-                    type:"edge-ngram",
-                    min_gram:1,
-                    max_gram:20
-                }
-            }   
-            
+            filter:{},
         },
          analyzer:{
-            autocomplete:{
-                type: "custom",
-                tokenizer: "standard",
+            analyzer_keyword:{
+                tokenizer: "keyword",
                 filter: [
-                    "lowercase",
-                    "autocomplete_filter"
+                    "lowercase"
+                ],
+                tokenizer:"edge_ngram_tokenizer"
+
+            }
+        },
+        tokenizer:{
+            edge_ngram_tokenizer:{
+                type:"edge_ngram",
+                min_gram: 1,
+                max_gram: 20,
+                token_chars: [
+                "letter"
                 ]
 
             }
-        }    
+        }
+
     }
 }).then(function(res){
     console.log('settings added successfully')

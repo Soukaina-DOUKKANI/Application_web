@@ -5,7 +5,6 @@ import {Link} from "react-router-dom"
 import {LoginContext} from './LoginContext';
 import "./styles/Design.css";
 import {useForm} from 'react-hook-form';
-import AutoSuggest from 'react-autosuggest';
 
 export default function List_procedures(){
 
@@ -24,26 +23,27 @@ export default function List_procedures(){
     
 
     useEffect(()=>{
-        Axios(setUser).get('http://localhost:4000/BDD')
+        Axios(setUser).get('/BDD')
         .then (result =>setBDD(result.data))
         .catch(err => console.log(err));  
     }, []);   
 
     useEffect(() => {  
-         Axios(setUser).get(`http://localhost:4000/appFonction/${baseDD}`)
+         Axios(setUser).get(`/appFonction/${baseDD}`)
          .then(resultat => {setDataFct(resultat.data)})
         .catch(err => console.log(err));  
     }, [baseDD]);  
         
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/appProcedure/${baseDD}`)
+        Axios(setUser).get(`/appProcedure/${baseDD}`)
         .then(result => {setData(result.data)})
         .catch(err => console.log(err));  
     }, [baseDD]);  
     
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/allData/${baseDD}`)
-        .then(resultat => {setAllData(resultat.data)})
+        Axios(setUser).get(`/allData/${baseDD}`)
+        .then(resultat => {
+            setAllData(resultat.data)})
         .catch(err => console.log(err));  
     }, [baseDD]);  
         
@@ -65,13 +65,12 @@ export default function List_procedures(){
     }
     
    const onSubmit=(searchData)=>{
-       Axios(setUser).post('http://localhost:4000/search',searchData)
+       Axios(setUser).post('/search',searchData)
        .then(result=>{setSearchData(result.data)
                       console.log(result.data)})
        .catch(err=>console.log(err))
    }
-    
-    
+   
     
     return(
         <div  className="container flex-column pas-rel">
@@ -81,8 +80,7 @@ export default function List_procedures(){
                 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="container input-group mb-3">
-                    
-                    <input class="form-control" type='text' autoComplete='off' placeholder='search bar' name='search' ref={register}/> 
+                    <input className="form-control" type='text' autoComplete='off' placeholder='search bar' ref={register} name= 'search'/>
                     <div className="input-group-append">
                         <button className="btn btn-outline-secondary" type='submit' >Rechercher</button>
 

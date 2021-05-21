@@ -9,6 +9,7 @@
     "bootstrap": "^4.6.0",
     "c3": "^0.7.20",
     "d3": "^6.6.1",
+    "elasticsearch": "^16.7.2",
     "file-saver": "^2.0.5",
     "generate-password": "^1.6.0",
     "history": "^5.0.0",

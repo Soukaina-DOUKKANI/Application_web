@@ -12,7 +12,7 @@ export default function Graphe({data, procedure}){
   const [dataG, setDataG]=useState([]);
 
   useEffect(()=>{
-    axios(setUser).get(`http://localhost:4000/getGraph/${procedure}`)
+    axios(setUser).get(`/getGraph/${procedure}`)
     .then(result => {setDataG(result.data)
                       console.log(result)}
                       )

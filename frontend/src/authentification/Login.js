@@ -15,7 +15,7 @@ export default function Login(){
     axios.defaults.withCredentials= true;
 
     const onSubmit= (login)=>{
-        axios.post("http://localhost:4000/connexion/", login)
+        axios.post("/connexion", login)
         .then((result) => {
             if ( result.data.auth){
                 localStorage.setItem('token', result.data.token )

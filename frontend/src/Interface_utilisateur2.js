@@ -20,7 +20,7 @@ export default function Interface_utilisateur2({match}){
 
 
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/Get_values_fct/${match.params.fct}`)
+        Axios(setUser).get(`/Get_values_fct/${match.params.fct}`)
         .then(result => setData(result.data))
         .catch(err => console.log(err));  
         
@@ -29,7 +29,7 @@ export default function Interface_utilisateur2({match}){
 
     const onSubmit =(df)=>{
        
-        Axios(setUser).post(`http://localhost:4000/set_function`, df)
+        Axios(setUser).post(`/set_function`, df)
         .then (result => setDataGraph(result.data))
         .catch(err => console.log(err));  
     }

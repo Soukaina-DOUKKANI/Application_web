@@ -12,7 +12,7 @@ export default function GrapheFct({data, fonction}){
   const [dataG, setDataG]=useState([]);
 
   useEffect(()=>{
-    axios(setUser).get(`http://localhost:4000/getGraphFct/${fonction}`)
+    axios(setUser).get(`/getGraphFct/${fonction}`)
     .then(result => {setDataG(result.data)
                       console.log(result)}
                       )

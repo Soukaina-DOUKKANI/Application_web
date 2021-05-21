@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const port = 4000
 // creation de l'app web 
 var app = express();
@@ -6,12 +7,10 @@ var sql = require('mssql');
 var moment= require('moment');
 var jwt= require('jsonwebtoken');
 var bcrypt= require('bcrypt');
+var cors = require('cors');    
 const { Client } = require('@elastic/elasticsearch')
 
 app.use(express.json())
-
-var cors = require('cors');    
-
 app.use(cors({credentials: true, origin: 'http://localhost:3000', methods:["GET,HEAD,OPTIONS,POST,PUT"]}));
 
 const client = new Client({ 
@@ -27,6 +26,8 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
         console.log('connected to elasticsearch')
     }
 })
+// run react in production 
+app.use(express.static(path.join(__dirname, './build')));
 
 // configuration de  SQL SERVER 
 var config = {
@@ -269,10 +270,8 @@ app.post('/search', function(req,res){
             res.send(result)
         }
     }) 
-
-    
-
 })
+
 
 //Utilisateurs : Affichage de la liste des utilisateurs, affichage des procedures stockees
 

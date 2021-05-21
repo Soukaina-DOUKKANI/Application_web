@@ -12,14 +12,14 @@ export default function AjoutFonction(){
 
     
     useEffect(()=>{
-        Axios(setUser).get('http://localhost:4000/BDD')
+        Axios(setUser).get('/BDD')
         .then (result => setBDD(result.data))
         .catch(err => console.log(err));  
         
     },[])
 
     const onSubmit = (formData)=>{
-        Axios(setUser).post(`http://localhost:4000/AjoutFonction`, formData)
+        Axios(setUser).post(`/AjoutFonction`, formData)
         .then (result => console.log(result))
         .catch(err => console.log(err));  
         

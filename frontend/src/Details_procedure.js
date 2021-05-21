@@ -13,7 +13,7 @@ export default function Details_procedures({match}){
 
   
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/page1/${match.params.name}/${match.params.baseDD}`).then(result => setData(result.data))
+        Axios(setUser).get(`/page1/${match.params.name}/${match.params.baseDD}`).then(result => setData(result.data))
         .catch(err => console.log(err));  
           
     }, []); 
@@ -21,7 +21,7 @@ export default function Details_procedures({match}){
     
     
     const onSubmit = (formData)=>{
-        Axios(setUser).post(`http://localhost:4000/set_data/${match.params.name}/${match.params.baseDD}`, formData)
+        Axios(setUser).post(`/set_data/${match.params.name}/${match.params.baseDD}`, formData)
         .then (result => console.log(result))
         .catch(err => console.log(err));  
         console.log(JSON.stringify(formData))

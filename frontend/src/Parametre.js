@@ -18,7 +18,7 @@ export default function  Parametre({type, valeur,bdd, requete, register, control
 
     useEffect(() => {  
         if (!isDate && !isValue){
-            Axios(setUser).get(`http://localhost:4000/Get_options/${requete}/${bdd}`)
+            Axios(setUser).get(`/Get_options/${requete}/${bdd}`)
             .then(result => setValues(result.data))
             .catch(err => console.log(err));  
 

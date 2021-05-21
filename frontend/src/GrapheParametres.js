@@ -19,7 +19,7 @@ export default function GrapheParametre({match}){
     
         
     const onChartSubmit =(chartData)=>{
-        Axios(setUser).post(`http://localhost:4000/setGraph/${match.params.proc}`, chartData)
+        Axios(setUser).post(`/setGraph/${match.params.proc}`, chartData)
         .then (result => {setChartData(result.data)
                            console.log(chartData)
                            console.log(result)})
@@ -27,7 +27,7 @@ export default function GrapheParametre({match}){
     }
 
     useEffect(()=>{
-        Axios(setUser).get('http://localhost:4000/BDD')
+        Axios(setUser).get('/BDD')
         .then (result => setBDD(result.data))
         .catch(err => console.log(err));  
         
@@ -35,7 +35,7 @@ export default function GrapheParametre({match}){
 
     const onSubmit =(df)=>{
        
-        Axios(setUser).post(`http://localhost:4000/set_procedure/`, df)
+        Axios(setUser).post(`/set_procedure/`, df)
         .then (result => {
             setGraph(result.data);
         })
@@ -43,7 +43,7 @@ export default function GrapheParametre({match}){
     }
 
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/Get_values/${match.params.proc}`)
+        Axios(setUser).get(`/Get_values/${match.params.proc}`)
         .then(result => setData(result.data))
         .catch(err => console.log(err));  
         

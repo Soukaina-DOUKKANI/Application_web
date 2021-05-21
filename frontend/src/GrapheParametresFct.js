@@ -19,14 +19,14 @@ export default function GrapheParametreFct({match}){
 
     
     useEffect(()=>{
-        Axios(setUser).get('http://localhost:4000/BDD')
+        Axios(setUser).get('/BDD')
         .then (result => setBDD(result.data))
         .catch(err => console.log(err));  
         
     },[])
         
     const onChartSubmit =(chartData)=>{
-        Axios(setUser).post(`http://localhost:4000/setGraphFct/${match.params.fct}`, chartData)
+        Axios(setUser).post(`/setGraphFct/${match.params.fct}`, chartData)
         .then (result => {setChartData(result.data)
                            console.log(chartData)
                            console.log(result)})
@@ -38,7 +38,7 @@ export default function GrapheParametreFct({match}){
     const onSubmit =(df)=>{
 
        console.log('df',df)
-        Axios(setUser).post(`http://localhost:4000/set_function/`, df)
+        Axios(setUser).post(`/set_function/`, df)
         .then (result => {
             setGraph(result.data);
         })
@@ -46,7 +46,7 @@ export default function GrapheParametreFct({match}){
     }
 
     useEffect(() => {  
-        Axios(setUser).get(`http://localhost:4000/Get_values_fct/${match.params.fct}`)
+        Axios(setUser).get(`/Get_values_fct/${match.params.fct}`)
         .then(result => {setData(result.data)
                          console.log(result.data)})
         .catch(err => console.log(err));  

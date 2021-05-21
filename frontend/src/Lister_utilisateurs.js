@@ -12,13 +12,13 @@ export default function Lister_utilisateurs(){
     const [user,setUser]=useContext(LoginContext);
 
     useEffect(() => {
-        Axios(setUser).get('http://localhost:4000/list_users')
+        Axios(setUser).get('/list_users')
         .then(result => setListUser(result.data))
         .catch(err=> console.log(err))
     },[])
 
     useEffect(() => {
-        Axios(setUser).get('http://localhost:4000/List_procedures')
+        Axios(setUser).get('/List_procedures')
         .then(result => setProcedure(result.data))
         .catch(err=> console.log(err))
     },[])

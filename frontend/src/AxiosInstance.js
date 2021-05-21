@@ -2,11 +2,9 @@ import axios from 'axios';
 
 const AxiosManager = (setUser) => {
 const AxiosInstance = axios.create({
-    baseURL: 'localhost:3000/'
+    baseURL: 'http://localhost:4000'
 })
 
-
-// Add a request interceptor
 AxiosInstance.interceptors.request.use(function (config) {
     const token = localStorage.getItem("token");
     config.headers.Authorization =  token;

@@ -20,13 +20,13 @@ export default function Utilisateurs({match}){
 
 
     useEffect(() => {
-        Axios(setUser).get('http://localhost:4000/List_procedures')
+        Axios(setUser).get('/List_procedures')
         .then(result => setProcedure(result.data))
         .catch(err=> console.log(err))
     },[])
     
     useEffect(() => {
-        Axios(setUser).get('http://localhost:4000/List_fonctions')
+        Axios(setUser).get('/List_fonctions')
         .then(result => {setFonction(result.data)
                           console.log(result)})
         .catch(err=> console.log(err))
@@ -36,7 +36,7 @@ export default function Utilisateurs({match}){
     useEffect(() => {
     const id=match.params.id;
     if(id){
-        Axios(setUser).get(`http://localhost:4000/get_user/${id}`)
+        Axios(setUser).get(`/get_user/${id}`)
         .then(result => {
             const obj={ 
                 id : result.data.ID,
@@ -132,7 +132,7 @@ export default function Utilisateurs({match}){
 
     const onSubmit=(data)=>{
         console.log(data)
-        Axios(setUser).post('http://localhost:4000/users', data).then( result => console.log(result))
+        Axios(setUser).post('/users', data).then( result => console.log(result))
         .catch(err => console.log(err));  
         //setUserData({ id : 0, utilisateur : "", identifiant : "", pwd: "", procedures:[]})
         history.push('/Lister_utilisateurs')
@@ -145,7 +145,7 @@ export default function Utilisateurs({match}){
         const identifiant= e.target.value;
         if(identifiant!=''){
             const id= userData.id;
-        Axios(setUser).get(`http://localhost:4000/checkIdentifiant/${identifiant}/${id}`)
+        Axios(setUser).get(`/checkIdentifiant/${identifiant}/${id}`)
         .then(result => {
             if (result.data== 'abort'){
                 setUserData( prevUser =>({
