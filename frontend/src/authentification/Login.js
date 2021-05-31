@@ -2,8 +2,9 @@ import React , {useContext} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';  
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {LoginContext} from '../LoginContext';
+import {LoginContext} from '../Authentification/LoginContext';
 import { useHistory } from 'react-router-dom';
+import '../styles/Login.css';
 
 
 export default function Login(){
@@ -15,7 +16,7 @@ export default function Login(){
     axios.defaults.withCredentials= true;
 
     const onSubmit= (login)=>{
-        axios.post("/connexion", login)
+        axios.post("http://localhost:4000/connexion", login) /* http://application.local/connexion */
         .then((result) => {
             if ( result.data.auth){
                 localStorage.setItem('token', result.data.token )
@@ -29,8 +30,8 @@ export default function Login(){
     }
 
     return(
-        <div className="container">
-            <h1 > Connexion</h1>
+        <div className="center">
+            <h1 className="h1"> Connexion</h1>
             <form onSubmit= {handleSubmit(onSubmit)}>
                <div className="form-group" class="col-md-6" >
                    <div>

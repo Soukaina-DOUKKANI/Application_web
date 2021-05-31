@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const port = 4000
+const port = process.env.PORT || 4000
 // creation de l'app web 
 var app = express();
 var sql = require('mssql');
@@ -27,18 +27,19 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
     }
 })
 // run react in production 
-app.use(express.static(path.join(__dirname, './build')));
+//app.use(express.static(path.join(__dirname, './build')));
 
 // configuration de  SQL SERVER 
 var config = {
-    server: "localhost\\MSSQLSERVER",
+    server: "localhost\\MSSQLSERVER", /* "localhost\\SQL2019"*/
     database:"APP_WEB_DATA",
-    user: "soukaina",
-    password: "souka-23",
+    user: "soukaina", /*" Administrator "*/
+    password: "souka-23", /* "fouad-007" */
     port: 1433,
     options: {
         enableArithAbort: true,
-        encrypt: true
+        encrypt: true, 
+        trustServerCertificate :true
     },
 };
 
