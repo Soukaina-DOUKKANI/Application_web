@@ -1,0 +1,23 @@
+.search{
+    background: url('../../images/loupe.png');
+    background-repeat: no-repeat;
+  background-size: 10%;
+  background-position:5% ;
+
+}
+
+.div2{
+    border-bottom: 2px solid rgb(255, 255, 255);
+    width:100%;
+    background-color: rgb(88, 88, 107);
+    height: 70px;
+    
+}
+
+
+.search-bar{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+     width: 35%;
+}

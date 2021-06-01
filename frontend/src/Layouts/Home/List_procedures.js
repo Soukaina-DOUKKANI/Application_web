@@ -3,9 +3,8 @@ import Axios from '../../Authentification/AxiosInstance';
 import 'bootstrap/dist/css/bootstrap.min.css' 
 import {Link} from "react-router-dom"
 import {LoginContext} from '../../Authentification/LoginContext';
-import "../../styles/Design.css";
 import {useForm} from 'react-hook-form';
-
+import "./Home.procedures.css";
 export default function List_procedures(){
 
     const [user,setUser]=useContext(LoginContext);
@@ -73,21 +72,24 @@ export default function List_procedures(){
    
     
     return(
-        <div  className="container flex-column pas-rel">
+        <div >
             {(user.role=='admin')&&
-            <div>
-            <div style={{'marginTop': '20px'}} className="container col-md-6">
+        <div >
+            <div className="div2">
+            <div  className="search-bar col-md-6 ">
                 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="container input-group mb-3">
-                    <input className="form-control" type='text' autoComplete='off' placeholder='search bar' ref={register} name= 'search'/>
-                    <div className="input-group-append">
-                        <button className="btn btn-outline-secondary" type='submit' >Rechercher</button>
-
+                    <div  >
+                    <div style={{ "position":"absolute","left":"420px","top":"10px"}} className=" input-group mb-3 ">
+                        <input  className=" form-control" type='text' autoComplete='off' placeholder='search bar' ref={register} name= 'search'/>
+                        <div className="input-group-append">
+                            <button className="btn btn-secondary"  type='submit' > Recherche</button>
+                        </div>
                     </div>
                     </div>
                    
                 </form>
+            </div>
             </div>
             <div styles={{'marginTop':'10px'}} className="container">
             {(searchData.length>0) && (searchData[0].table_name)  &&

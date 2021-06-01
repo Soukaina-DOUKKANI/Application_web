@@ -3,6 +3,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Link} from 'react-router-dom';
 import {LoginContext} from '../Authentification/LoginContext';
 import {NavDropdown} from 'react-bootstrap';
+import logo from '../images/logo-white.png';
+import './Header.style.css';
 
 export default function Header(){
     const [user,setUser]=useContext(LoginContext);
@@ -10,41 +12,40 @@ export default function Header(){
     const Logout=()=>{
         localStorage.removeItem('token');
         setUser({isLoggedIn: false, role: ''});
-
-
     }
 
     if (user.isLoggedIn){
         if(user.role=='admin'){
             return(
-                <nav className= "navbar  navbar-expand-lg bg-dark navbar-dark">
-                    <Link to='/' class="navbar-brand" >LOGO</Link>
-                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+                <nav className= "navbar   navbar-expand-lg nav-color">
+                    <div className="container ">
+                    <Link to='/' class="navbar-brand " >
+                        <img className=" image3" src={logo} alt={logo}/>
+                    </Link>
+                        
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav  ">
                         <li className= "nav-item active">
-                            <Link to="/" className="nav-link" > Accueil</Link>
+                            <Link to="/" className="nav-link nav-text" > Accueil</Link>
                         </li>
                         <li className= "nav-item active">
-                            <Link to="/Lister_utilisateurs" className="nav-link" > Utilisateurs</Link>
+                            <Link to="/Lister_utilisateurs" className="nav-link nav-text " > Utilisateurs</Link>
                         </li>
-                        <NavDropdown title="Ajouter" id="basic-nav-dropdown">
+                        <NavDropdown  className="nav-text " title="Ajouter" id="basic-nav-dropdown">
                             <NavDropdown.Item> <Link to ="/AjoutProcedure">Ajouter une procédure</Link></NavDropdown.Item>
                             <NavDropdown.Item><Link to="/AjoutFonction" >Ajouter une fonction</Link></NavDropdown.Item>
                             
                         </NavDropdown>
                        
                         <li className= "nav-item active">
-                           <Link to="/Login" onClick={Logout} className="nav-link" > Déconnexion</Link>
+                           <Link to="/Home" onClick={Logout} className="nav-link nav-text " > Déconnexion</Link>
 
                         </li>
                        
                     </ul>
                     
                     </div>
-        
+                    </div>
         
                 </nav>)
 

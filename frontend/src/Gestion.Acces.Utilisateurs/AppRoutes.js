@@ -15,12 +15,12 @@ import Details_fonction from '../Layouts/Main.Administrateur/Fonctions/Details_f
 import GrapheParametresFct from '../Layouts/Main.Administrateur/Fonctions/GrapheParametresFct';
 import Interface_utilisateur2 from '../Layouts/Main.Utilisateurs/Fonctions/Interface_utilisateur2';
 import AjoutFonction from '../Layouts/Main.Administrateur/Fonctions/AjoutFonction';
-
+import SearchBar from '../Moteur.recherche/SearchBar';
 
 export default function AppRoutes(){
     const [user,setUser]=useContext(LoginContext);
     const history= useHistory();
-    
+   
     useEffect(()=> {
         if (!user.isLoggedIn){
             if(localStorage.getItem('token')){
@@ -32,7 +32,8 @@ export default function AppRoutes(){
                 
             }
             else{
-                history.push('/Login')
+                history.push('/Home')
+
             }
         }    
     },[user])
@@ -42,6 +43,7 @@ export default function AppRoutes(){
         <div>
 
             <Switch> 
+                <Route path="/Home" exact component={SearchBar}/>
                 <Route path="/Login" exact  component={Login} />
                 <Route path="/" exact  component={List_procedures} />
                 <ProtectedRoutes path="/AjoutProcedure" exact component={AjoutProcedure} role={['admin']}/>

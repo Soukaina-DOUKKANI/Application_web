@@ -45,12 +45,12 @@ export default function Interface_utilisateur2({match}){
             {
                 
                 Object.keys(data).map((key ) =>{
-                    if(key=='bdd'){
+                    if(key==='bdd'){
                         return(
                             <input type='hidden' name='bdd' value={data[key]} ref={register} />
                         )
                     }
-                    if (key=='procedure'){
+                    if (key==='procedure'){
                         return(
                             
                             <div >
@@ -60,7 +60,7 @@ export default function Interface_utilisateur2({match}){
                             </div> 
                             )
                     }
-                    if(key=='description'){
+                    if(key==='description'){
                         return(
                             <tr  className="row">
                                 <th>Description</th>
@@ -68,7 +68,7 @@ export default function Interface_utilisateur2({match}){
                             </tr>
                         )
                     }
-                    if (key.charAt(0)=="@"){
+                    if (key.charAt(0)==="@"){
                         return(
                             <tr  className="row"  > 
                                 <th style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </th>  

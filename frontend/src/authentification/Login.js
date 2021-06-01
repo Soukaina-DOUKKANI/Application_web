@@ -4,9 +4,8 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {LoginContext} from '../Authentification/LoginContext';
 import { useHistory } from 'react-router-dom';
-import '../styles/Login.css';
-
-
+import logo from '../images/logo.png';
+import "./Login.styles.css";
 export default function Login(){
 
     const {handleSubmit, register}= useForm();
@@ -30,27 +29,21 @@ export default function Login(){
     }
 
     return(
-        <div className="center">
-            <h1 className="h1"> Connexion</h1>
-            <form onSubmit= {handleSubmit(onSubmit)}>
-               <div className="form-group" class="col-md-6" >
-                   <div>
-                   <label  for ="id">Identifiant</label>
-                   <input id='id' class="form-control" autoComplete='off' placeholder='Saisir un identifiant' name='identifiant'type="text" ref={register({ required: true })}/>
-                   
-                   </div>
-                 <div className="form-group">
-                 <label  for ="pwd">Mot de passe</label>
-                 <input class="form-control" autoComplete='off' placeholder='Saisir un mot de passe' name='pwd' type="password" ref={register({ required: true })}/> 
-
-                 </div>
-                <div>
-                <button  className="btn btn-primary" type="submit">Connexion</button> 
-
-                </div>
-                </div>  
+        <div className="background-image" >
+            <div >
+                <img className="image2"  src={logo} alt="logo"/>
+            </div>
+            <div className="login-block">
+            <h1 className="h1">Bienvenue</h1>
+            <form  onSubmit= {handleSubmit(onSubmit)}>
+                <input  id="identifiant"  autoComplete='off' placeholder='Identifiant' name='identifiant' type="text" ref={register({ required: true })}/>
+                <input id="password" autoComplete='off' placeholder='Mot de passe' name='pwd' type="password" ref={register({ required: true })}/> 
+                
+                <button   type="submit">Connexion</button>
+               
             </form> 
 
-
-        </div>)
+       </div> 
+        </div>
+    )
 }

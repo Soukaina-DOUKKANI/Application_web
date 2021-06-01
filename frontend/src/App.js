@@ -1,11 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Footer from './Layouts/Footer';
 import Header from './Layouts/Header';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import AppRoutes from './Gestion.Acces.Utilisateurs/AppRoutes';
-
 
 export default function App(){
      
@@ -13,10 +11,11 @@ export default function App(){
          
         <div>
             <Router >
-                <Header/>
-                <AppRoutes/>
-                <Footer/>
-
+               
+            <Header/>
+            <AppRoutes/>
+            <Footer/>
+               
             </Router>
         </div>
         )

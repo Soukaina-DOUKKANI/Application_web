@@ -26,6 +26,44 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
         console.log('connected to elasticsearch')
     }
 })
+
+//search bar elasticsearch  for first page (middleware JWT)
+app.post('/searchBar', function(req,res){
+    const search=req.body.search
+    client.search({
+        index: ['metadonnees','tables4'],
+        body:{
+            query: {
+                multi_match: {
+                    query: search,
+                    operator:"and",
+                    fuzziness: "auto",
+                    fuzzy_transpositions: true,
+                    max_expansions: 50,
+                    prefix_length: 1
+                }
+            },     
+        }
+    },function(error,data){
+        if (error){
+            console.log(error)
+        }
+        else{
+            const result=[]
+            const obj_search=data.body.hits.hits
+            obj_search.map(item=>{
+                Object.keys(item).map(key=>{
+                    if(key=='_source'){
+                        result.push(item[key])
+                    }
+                })
+                
+            })
+            res.send(result)
+        }
+    }) 
+})
+
 // run react in production 
 //app.use(express.static(path.join(__dirname, './build')));
 
