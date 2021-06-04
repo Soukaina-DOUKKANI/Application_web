@@ -4,6 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import {LoginContext} from '../../Authentification/LoginContext';
 import Axios from '../../Authentification/AxiosInstance'; 
 import { Controller} from "react-hook-form";
+import '../Main.Administrateur/Procedures/procedures.css';
 
 
 export default function  Parametre({type, valeur,bdd, requete, register, control, setValue}) {
@@ -34,7 +35,7 @@ export default function  Parametre({type, valeur,bdd, requete, register, control
     if (isDate){
         
         return(
-            <div>
+            <div className='form-group align-parameters'  >
                 
                 <Controller
                 control={control}
@@ -42,6 +43,7 @@ export default function  Parametre({type, valeur,bdd, requete, register, control
                 defaultValue={selectedDate}
                 render={() => (
                     <DatePicker
+                     className='form-control col-md-12'
                         selected={selectedDate}
                         onChange={handleChange}
                         dateFormat='dd/MM/yyyy' 
@@ -57,14 +59,14 @@ export default function  Parametre({type, valeur,bdd, requete, register, control
         else{
             if (isValue){
                 return(
-                        <input value={valeur} name = {type} ref={register}  />
+                        <input className='form-control align-parameters' value={valeur} name = {type} ref={register}  />
                 )
 
             }
             else{
             return(
-                 <div>
-                     <select  name = {type} ref={register}>
+                 <div >
+                     <select  className='form-control'  name={type} ref={register}>
                         
                          {values.map(item =>{
                            return (

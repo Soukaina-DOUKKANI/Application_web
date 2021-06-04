@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "../../../styles/Design.css";
 import {useForm} from "react-hook-form";
 import {Link} from 'react-router-dom';
+import './procedures.css';
 
 export default function Details_procedures({match}){
     const {register, handleSubmit}= useForm();
@@ -28,20 +29,20 @@ export default function Details_procedures({match}){
 
     }
     return(
-        <div className="container-fluid">
-            <div className="row">
-            <h2 className="h2" > La procédure {data.SP_NAME} </h2>
-            
-            
-        <form   className="container-fluid" onSubmit={handleSubmit(onSubmit)}> 
-        <table className="table table-striped" >  
+        
+        <div >
+               
+        <form   className="container" onSubmit={handleSubmit(onSubmit)}> 
+        <h2   > Métadonnées de la  procédure {data.SP_NAME} </h2>
+
+        <table className="table table-bordered" >  
         
             <tbody>
                 <tr>
                     <input type="hidden" value= {match.params.baseDD} name="bdd" ref={register}/>
                    <th>NOM DE LA PROCEDURE</th> 
                    <td>
-                    <input  name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
+                    <input className='form-control col-sm-11' name="procedure" autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>  
                    </td>
                 </tr>
                 <tr>
@@ -55,7 +56,7 @@ export default function Details_procedures({match}){
                 <tr>
                    <th>DESCRIPTION</th>  
                    <td>
-                   <textarea className='form-control' name="description" autoComplete="off"  type="text"  placeholder="Ajouter une description" ref={register} ></textarea> 
+                   <textarea className='form-control col-sm-11' name="description" autoComplete="off"  type="text"  placeholder="Ajouter une description" ref={register} ></textarea> 
                    </td>
                 </tr>
                 <tr>
@@ -76,40 +77,49 @@ export default function Details_procedures({match}){
                        {data.parameters.map(item =>{
                            if (item.DATA_TYPE==='date'){
                             return (
-                                <p>
-                                <span className="span" >{item.PARAMETER_NAME}</span>
-                                <span className="span"><input  name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/></span>
-                                 </p>
+                                <div className='parameter-border'>
+                                    <p className='row'> 
+                                        <label className="col-md-2" >{item.PARAMETER_NAME}</label>
+                                        <input  className='form-control col-sm-9' name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>
+                                    </p>
+                                </div>
                                      
                             );}
                             else {
                                 return(
-                                 <div >
-                                 <span className="span" >{item.PARAMETER_NAME}</span>
-                                  <span className="span" ><input className=' input'  autoComplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/></span>
-                                  <p className="p" ><input  autoComplete='OFF' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/></p>
-                                  OU
-                                  <p className="p">
-                                  <textarea  className=" textarea" autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
-                                  </p>
-                                  </div>
+                                <div className='parameter-border'>
+                                    <p className='row' >
+                                        <label className="col-md-2">{item.PARAMETER_NAME}</label>
+                                        <input   className='form-control col-sm-9'  autoComplete="off" name={item.PARAMETER_NAME} type="text" placeholder="Renommer" ref={register}/>
+                                    </p>
+                                    <p className='row'>
+                                        <label className="col-md-2"></label>
+                                        <input className='form-control col-sm-9' autoComplete='OFF' placeholder='insérer une valeur' name='valeur' type='text' ref={register}/>
+                                        
+                                    </p>
+                                    <p className='row'>
+                                        <label className="col-md-2">OU</label>
+                                        <textarea className='form-control col-sm-9'   autoComplete="off" placeholder=" insérer une requête" name="request" type="text" ref={register}></textarea>
+                                    </p>
+                                </div>
                                 );
                             }
                        })}</td>
                 </tr>
             </tbody>
            </table> 
-            <div className="div" > 
-            <button onClick={()=> alert('Opération réussie')} className="button" type="submit"> Enregistrer</button>
+            <div className=" container row "  style={{'marginBottom':'60px'}}> 
+            <button style={{'marginLeft':'400px'}} onClick={()=> alert('Opération réussie')} className="btn btn-primary" type="submit"> Enregistrer</button>
+            <div style={{'marginLeft':'30px'}}>
             <Link to= {`/GrapheParametres/${data.SP_NAME} `}> 
-                <button className="button2" > Paramétrer le graphe</button> 
+                <button className="btn btn-info" > Paramétrer le graphe</button> 
             </Link>
+            </div>
             </div>
            
         </form> 
         
         </div> 
         
-        </div>
         )
 }

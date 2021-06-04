@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "../../../styles/Design.css";
 import {LoginContext} from '../../../Authentification/LoginContext';
 import Parametre from '../Parametre';
-
+import './procedures.css';
 
 export default function GrapheParametre({match}){
 
@@ -75,7 +75,8 @@ export default function GrapheParametre({match}){
     console.log('data',data)
 
     return (
-        <div className="container"> 
+        <div className="graphe-param"> 
+        {(graph.length===0) &&
          <form key={1} onSubmit={handleSubmit(onSubmit)}>
              <div  >
              { 
@@ -98,46 +99,49 @@ export default function GrapheParametre({match}){
                      if (key.charAt(0)=="@"){
                          return(
                              <div className="row"  > 
-                                 <span style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </span>  
-                                 <Parametre type={key} bdd={data['bdd']} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
+                                 <label className='col-md-1'>{data[key]}</label> 
+                                 <Parametre  type={key} bdd={data['bdd']} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} />
                              </div>)
                      } 
                      
                  })
              }
-             <div className="div">
-                 <button className="button" type="submit"> Executer</button> 
+             <div >
+                 <button style={{'marginTop':'10px'}} className="btn btn-primary" type="submit"> Executer</button> 
              </div>
             
          </div>
          </form>
-
-         {graph.length>0 && (
+        }
+        {graph.length>0 && (
              
             <form key={2} onSubmit={handleSubmit2(onChartSubmit)} >
-                <table style={{'marginTop': '30px'}} className="table " > 
+                <h2>Paramétrage du graphe</h2>
+                <table className=" table table2 table-bordered " > 
                 
-                <tr >
+                <tr className="form-group" >
                         <th>Titre</th>
-                        <td>
-                            <input name='title' autoComplete='off' placeholder='Nom du graphe' ref={register2}/>
+                        <td colspan='4'>
+                            <input className='form-control' name='title' autoComplete='off' placeholder='Nom du graphe' ref={register2}/>
                         </td>
                 </tr> 
                     
                 {Object.keys(graph[0]).map(key =>{
                     return(
                     
-                    <tr>
+                    <tr className='form-group' >
                        <th>{key}</th>
-                       <td>
-                        <input class="form-check-input" type="checkbox"  name={key+'_visible'}  ref={register2}  />Visible
+                       <td >
+                        <input style={{'marginLeft':'1px', 'marginRight':'1px'}} className="  form-check-input" type="checkbox"  name={key+'_visible'}  ref={register2}  />
+                        <label style={{'marginLeft':'10px'}} className='col-md-2'>Visible</label>
+
                        </td> 
                        
                        <td>
-                           <input autoComplete='off' placeholder='Label' name={key+'_label'}  ref={register2} />
+                           <input className='form-control' autoComplete='off' placeholder='Label' name={key+'_label'}  ref={register2} />
                        </td>
                        <td>
-                            <select  name ={key + '_chart'} ref={register2}>
+                            <select className='form-control'  name ={key + '_chart'} ref={register2}>
                                 {options.map(item =>{
                                 return (
                                         <option value={item.value}>{item.value}</option>
@@ -149,7 +153,7 @@ export default function GrapheParametre({match}){
                        
                        
                        <td>
-                            <select  name={key+'_axe'} ref={register2}>
+                            <select  className='form-control' name={key+'_axe'} ref={register2}>
                                 {values.map(item =>{
                                 return (
                                         <option value={item.value}>{item.value}</option>
@@ -161,7 +165,7 @@ export default function GrapheParametre({match}){
                 } 
                 </table>
                 <div className="div">
-                    <button onClick={()=> alert('Opération réussie')} className="button" type="submit"> Enregistrer</button> 
+                    <button onClick={()=> alert('Opération réussie')} className="btn btn-primary" type="submit"> Enregistrer</button> 
                 </div>
             </form>
         )}

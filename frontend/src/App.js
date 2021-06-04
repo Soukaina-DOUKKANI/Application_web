@@ -14,7 +14,6 @@ export default function App(){
                
             <Header/>
             <AppRoutes/>
-            <Footer/>
                
             </Router>
         </div>

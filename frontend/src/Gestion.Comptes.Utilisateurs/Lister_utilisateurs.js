@@ -30,10 +30,10 @@ export default function Lister_utilisateurs(){
             <div className='row'>
             <h2>Membres</h2> 
             <Link to={`/Utilisateurs`}>
-                <button style={{'marginLeft':'30px'}} type="button" class="btn btn-info"> Ajouter un membre</button>
+                <button style={{'marginLeft':'30px'}} type="button" class="btn btn-primary"> Ajouter un membre</button>
             </Link>
             </div>
-            <table class="table " style={{'marginTop':'30px'}}>
+            <table className="table table-bordered " style={{'marginTop':'30px'}}>
                 <thead>
                     <tr>
                         <th>Nom utilisateur</th>
@@ -50,10 +50,11 @@ export default function Lister_utilisateurs(){
                                      <td >{item.identifiant}</td>
                                      <td>
                                      <Link to={`/Utilisateurs/${item.ID}`}>
-                                            <button style={{'marginLeft':'30px'}} type="button" class="btn btn-info">
+                                            <button style={{'marginLeft':'30px'}} type="button" class="btn btn-primary">
                                                 Editer
-                                                </button>
+                                            </button>
                                     </Link>
+                                    <button style={{'marginLeft':'15px'}} className='btn btn-danger'>Supprimer</button>
                                     </td>
                                         
                                    
@@ -66,7 +67,6 @@ export default function Lister_utilisateurs(){
                     
                 </tbody> 
             </table>
-
 
            
         </div>

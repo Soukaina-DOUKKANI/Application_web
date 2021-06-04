@@ -1,17 +1,31 @@
 .search{
     background: url('../../images/loupe.png');
     background-repeat: no-repeat;
-  background-size: 10%;
-  background-position:5% ;
+    background-size: 10%;
+    background-position:5% ;
 
 }
 
 .div2{
     border-bottom: 2px solid rgb(255, 255, 255);
     width:100%;
-    background-color: rgb(88, 88, 107);
+    background-color: rgb(218, 238, 243); 
     height: 70px;
+    position: relative;
     
+}
+.body-image{
+  background: url('../../images/data-share.jpg') ;
+  background-size:contain;
+  background-repeat: no-repeat;
+  height:50vh;
+  margin-top: 50px;
+  margin-left: 400px;
+  margin-right: 30px;
+  display: block;
+  
+
+  
 }
 
 
@@ -19,5 +33,58 @@
     display: block;
     margin-left: auto;
     margin-right: auto;
-     width: 35%;
+    width: 30%;
+}
+.search-bar .barre{
+  border-radius: 20px;
+}
+
+.div2 .bouton{
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+  top:10px;
+  right:30px;
+  left:10%;
+  text-align: center;
+  border-radius: 40px;
+  width: 10%;
+  height: 35px;
+}
+
+.div2 .bouton2{
+  background-color: rgb(255, 255, 255);
+  position: absolute;
+  top:10px;
+  right:30px;
+  left:25%;
+  text-align: center;
+  border-radius: 40px;
+  width: 15%;
+  height: 35px;
+
+}
+
+.div2 .bouton3{
+  background-color: rgb(255,255,255);
+  position: absolute;
+  top:10px;
+  right:30px;
+  left:600px;
+  text-align: center;
+  border-radius: 40px;
+  width: 15%;
+  height: 35px;
+
+}
+.div2 .search-btn{
+  background-color: rgb(255,255,255);
+  position: absolute;
+  top:10px;
+  right:30px;
+  left:900px;
+  text-align: center;
+  border-radius: 40px;
+  width: 10%;
+  height: 35px;
+
 }

@@ -1,0 +1,31 @@
+.graphe-param{
+    margin-top:30px;
+    margin-left: 20%;
+    border:1px solid rgb(175, 173, 168);
+    margin-right: 10%;
+    padding-top:15px;
+    padding-bottom: 40px;
+    padding-left: 15px;
+    border-radius: 15px;
+    background-color:#fff;
+    margin-bottom:20px;
+    box-shadow:0 2px 3px 0 rgba(60,64,67,0.302),0 1px 3px 1px rgba(60,64,67,0.149);
+
+}
+
+.parameter-border{
+    border-bottom: 1px solid #dee2e6 ;
+    border-width: 100%;
+    margin-bottom: 5px;
+    margin-top:5px;
+}
+
+.align-parameters{
+    display:block;
+    right:100px;
+}
+
+.table2{
+    margin-top: 30px;
+    width:95%;
+}

@@ -16,6 +16,7 @@ import GrapheParametresFct from '../Layouts/Main.Administrateur/Fonctions/Graphe
 import Interface_utilisateur2 from '../Layouts/Main.Utilisateurs/Fonctions/Interface_utilisateur2';
 import AjoutFonction from '../Layouts/Main.Administrateur/Fonctions/AjoutFonction';
 import SearchBar from '../Moteur.recherche/SearchBar';
+import Home from '../Layouts/Home/Home';
 
 export default function AppRoutes(){
     const [user,setUser]=useContext(LoginContext);
@@ -45,7 +46,8 @@ export default function AppRoutes(){
             <Switch> 
                 <Route path="/Home" exact component={SearchBar}/>
                 <Route path="/Login" exact  component={Login} />
-                <Route path="/" exact  component={List_procedures} />
+                <Route path="/Affichage" exact  component={List_procedures} />
+                <ProtectedRoutes path="/" exact component={Home} role={['admin']}/>
                 <ProtectedRoutes path="/AjoutProcedure" exact component={AjoutProcedure} role={['admin']}/>
                 <ProtectedRoutes path="/AjoutFonction" exact component={AjoutFonction} role={['admin']}/>
                 <ProtectedRoutes path="/Lister_utilisateurs" exact component={Lister_utilisateurs} role={['admin']}/>

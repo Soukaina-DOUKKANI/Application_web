@@ -8,8 +8,8 @@ export default function Footer(){
 
     if(user.isLoggedIn){
         return(
-            <div className=" footer fixed-bottom bg-dark text-center" >
-                 <p style={{"color": "white"}}> 2021 © </p>
+            <div style={{'marginTop':'100px'}} className=" footer fixed-bottom bg-dark text-center" >
+                 <p style={{"color": "white" }}> 2021 © </p>
             
             </div> )
 

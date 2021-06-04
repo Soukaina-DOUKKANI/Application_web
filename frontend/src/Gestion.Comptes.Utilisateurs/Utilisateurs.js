@@ -5,7 +5,7 @@ import Axios from '../Authentification/AxiosInstance';
 import generator from 'generate-password';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useHistory} from 'react-router-dom';
-
+import './Utilisateurs.styles.css';
 
 export default function Utilisateurs({match}){
      
@@ -112,7 +112,6 @@ export default function Utilisateurs({match}){
             numbers: true,
             lowercase: true,
             uppercase: true,
-    
         });
         return(pass)
         
@@ -168,20 +167,21 @@ export default function Utilisateurs({match}){
     }
 
     return (
-        <div className="container" >
+        <div className='utilisateurs-creation' >
+            <form className="container" onSubmit={handleSubmit(onSubmit)}>
             <h2> Gestion des comptes Utilisateurs</h2>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="form-group" class="col-md-6">
+
+                <div className="form-group" >
                     <input type="hidden" name='id' value={userData.id} ref={register}/>
-                    <div>
-                    <label  for ="utilisateur">Nom utilisateur</label>
-                    <input class="form-control" onChange={handleChange} value={userData.utilisateur} id="utilisateur" name="utilisateur" type="text" autoComplete='off' ref={register({ required: true })}/>
+                    <p className='row'>
+                    <label className='col-md-4' for ="utilisateur"> Ajouter le nom de l'utilisateur</label>
+                    <input className="form-control col-sm-7 " onChange={handleChange} value={userData.utilisateur} id="utilisateur" name="utilisateur" type="text" autoComplete='off' ref={register({ required: true })}/>
                     
-                    </div>
-                    <div>
-                       <label for="identifiant"> Créer un identifiant</label>
-                       <input class="form-control" onChange={handleChange} onBlur={onBlur} value={userData.identifiant} id="identifiant" name="identifiant" type="text" autoComplete='off' ref={register({ required: true })}/>
-                    </div>
+                    </p>
+                    <p className='row'>
+                       <label className='col-md-4' for="identifiant"> Créer un identifiant</label>
+                       <input className="form-control col-sm-7"  onChange={handleChange} onBlur={onBlur} value={userData.identifiant} id="identifiant" name="identifiant" type="text" autoComplete='off' ref={register({ required: true })}/>
+                    </p>
                     
                     {alerte && (
                         <div class="alert alert-danger" role="alert">
@@ -189,38 +189,37 @@ export default function Utilisateurs({match}){
                         </div>
                     )}
 
-                    <label for="pwd"> Créer un mot de passe</label>
-
-                    <div className="input-group mb-3">
-                        <input autoComplete='off' class="form-control" onChange={handleChange} value={userData.pwd} name="pwd" id="pwd"  ref={register({ required: true })} />
-                        <div className="input-group-append">
-                            <button className="btn btn-outline-secondary" type="button" onClick={onClick}> Générer</button>
-                        </div>
-                    </div>
-                    <label>Liste des procédures </label>
-                    <div className="input-group mb-3">
+                    <p className="input-group ">
+                        <label for="pwd"> Créer un mot de passe</label>
                         
-                        {<select multiple={true} name='procedures' onChange={handleChange2} value={userData.procedures}  ref={register}>
+                        <input style={{'marginLeft':'110px'}} autoComplete='off' className="form-control col-md-6" onChange={handleChange} value={userData.pwd} name="pwd" id="pwd"  ref={register({ required: true })} />
+                        
+                        <div className="input-group-append">
+                            <button style={{'paddingLeft':'20px'}} className="btn btn-outline-primary " type="button" onClick={onClick}> Générer</button>
+                        </div>
+                    </p>
+                    <p className='row'>
+                    <label className='col-md-4' >Liste des procédures </label>
+                    <select className="form-control col-sm-7 " multiple={true} name='procedures' onChange={handleChange2} value={userData.procedures}  ref={register}>
                                             {procedure.map(item =>{
                                                 return (
                                                     <option value={item.P}>{item.P}</option>
                                                 )})}
-                                                </select> }
+                    </select> 
                            
-                    </div>
-                    <label>Liste des fonctions</label>
-                    <div className="input-group mb-3">
-                    { 
-                    <select multiple={true} name='fonctions' onChange={handleChange3} value={userData.fonctions}  ref={register}>
+                    </p>
+                    
+                    <p className='row'>
+                    <label className='col-md-4' >Liste des fonctions</label>
+                    <select className="form-control col-sm-7 " multiple={true} name='fonctions' onChange={handleChange3} value={userData.fonctions}  ref={register}>
                         {fonction.map(item =>{
                             return (
                                 <option value={item.F}>{item.F}</option>
                             )})}
-                            </select>
-                        }
-                    </div>
+                    </select>
+                    </p>
                 </div>
-                <button onClick={()=> alert('Modifications enregistrées')} type="submit" class="btn btn-primary" >Enregistrer </button>
+                <button  onClick={()=> alert('Modifications enregistrées')} type="submit" className=" btn1 btn btn-primary" >Enregistrer </button>
 
 
             </form>

@@ -1,17 +1,17 @@
 import React, { useState ,useEffect, useContext } from 'react' ; 
+import {useForm} from "react-hook-form";
+import {Link} from 'react-router-dom';
 import {LoginContext} from '../../../Authentification/LoginContext';
 import Axios from '../../../Authentification/AxiosInstance'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "../../../styles/Design.css";
-import {useForm} from "react-hook-form";
+import '../Fonctions/AjoutFonction.styles.css';
 
 export default function AjoutProcedure(){
     const {register, handleSubmit}= useForm();
     const [user,setUser]=useContext(LoginContext);
-    const [bdd, setBDD]=useState([])
-
+    const [bdd, setBDD]=useState([]);
     
-  
+
     
     useEffect(()=>{
         Axios(setUser).get('/BDD')
@@ -24,46 +24,69 @@ export default function AjoutProcedure(){
         Axios(setUser).post(`/AjoutProcedure`, formData)
         .then (result => console.log(result))
         .catch(err => console.log(err));  
-        
-
     }
 
     
     return(
         
-        <div className='container'>
-            <h2 style={{'marginTop':'20px'}}>Ajouter une procédure stockée</h2>
+        <div  >
+            <div className="div2 ">
+                <Link to={'/Affichage'}>
+                    <button className="bouton" >Affichage</button>
+                </Link>
+                <Link to= {'/AjoutProcedure'}>
+                    <button className="bouton2">Ajouter une procédure</button>
+                </Link >
+                <Link to= {'/ajoutFonction'}>
+                    <button className="bouton3">Ajouter une fonction</button>
+                </Link>
+                <Link to={'/'}>
+                    <button className="search-btn">Recherche</button>
+                </Link>
+            </div>
+            <div className="div3">
    
             <form onSubmit={handleSubmit(onSubmit)}>
-        
-                <div style={{'marginTop':'20px'}} class="form-group">
-                    <label for="nameproc">Nom de la procédure</label>
+                <div className='form-group row'>
+                <div  className='col-md-2'>
+                    <label  for="nameproc"> Nom Procédure </label>
+                </div>
+                <div className="col-sm-9">
                     <input autoComplete='off' type="text" className="form-control" id="nameproc" name='name'  placeholder="insérer un nom" ref={register}/>
                 </div>
-                <div class="form-group">
-                    <label style={{'marginRight':'15PX' }} for="bdd">Base de données  </label>
-                    <select  name = 'bdd' ref={register}>
+                </div>
+                <div className="form-group row">
+                    <div className='col-md-2'>
+                    <label for="bdd">Base de données  </label>
+                    </div>
+                    <div className="col-sm-9">
+                    <select  className="form-control" name ='bdd' ref={register}>
                         {bdd.map(item =>{
                           return (
                                    <option value={item.bdd}>{item.bdd}</option>
                           )})}
                     </select>
-                    
+                    </div>
                        
                 </div>
                 
                
                 
-                <div class="form-group">
-                    <label for="proc">Procédure stockée</label>
+                <div class="form-group row">
+                <div className='col-md-2'>
+
+                    <label for="proc">Code SQL</label>
+                    </div>
+                <div className="col-sm-9">
+
                     <textarea autoComplete='off' type="text" className="form-control" id="proc" name='procedure' placeholder="insérer la requête SQL" ref={register}></textarea>
                 </div>
+                </div>
         
-                <button onClick={()=>alert('Opération réussie')} type="submit" className="btn btn-primary">Enregistrer</button>
+                <button onClick={()=>alert('Opération réussie')} type="submit" className=" btn1 btn btn-primary">Enregistrer</button>
           
             </form>
-
-           
+            </div>
 
            
         </div>
