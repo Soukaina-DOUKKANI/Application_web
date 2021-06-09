@@ -1,11 +1,10 @@
-import React, { useState, useEffect ,  useContext } from 'react'  
+import React, { useState ,  useContext } from 'react'  
 import Axios from '../../Authentification/AxiosInstance';  
 import 'bootstrap/dist/css/bootstrap.min.css' 
 import {Link} from "react-router-dom"
 import {LoginContext} from '../../Authentification/LoginContext';
 import {useForm} from 'react-hook-form';
 import "./Home.procedures.css";
-import database from '../../images/database.png';
 
 export default function Home(){
     const [user,setUser]=useContext(LoginContext);
@@ -28,7 +27,7 @@ export default function Home(){
                             <form onSubmit={handleSubmit(onSubmit)}>
                                 <div  >
                                 <div style={{ "position":"absolute","left":"420px","top":"10px"}} className=" input-group mb-3 ">
-                                    <input  className=" barre form-control" type='text' autoComplete='off' placeholder='search bar' ref={register} name= 'search'/>
+                                    <input  className=" barre form-control" type='text' autoComplete='off' placeholder='Chercher' ref={register} name= 'search'/>
                                     <div className=" input-group-append">
                                         <button className=" barre btn btn-info"  type='submit' > Recherche</button>
                                     </div>
@@ -57,16 +56,16 @@ export default function Home(){
                         </div>
                         }
                     </div>
-                    <div styles={{'marginTop':'10px'}} className="container">
+                    <div style={{'marginTop':'20px'}} className="container">
                     {(searchData.length>0) && (searchData[0].table_name)  &&
                     <table className="table table-bordered ">
                                     <thead>
                                     <tr>
-                                        <th>database_name</th>
-                                        <th>table_name</th>
-                                        <th>table_Description</th>
-                                        <th>column_name</th>
-                                        <th>column_type</th>
+                                        <th>Nom de la base de données</th>
+                                        <th>Nom de la table</th>
+                                        <th>Description de la table</th>
+                                        <th>Nom de la colonne </th>
+                                        <th>Type de la colonne</th>
                                         
                                     </tr>
                                     </thead>
@@ -92,11 +91,10 @@ export default function Home(){
                         <table className="table table-bordered ">
                         <thead>
                             <tr>
-                                <th>Seance</th>
-                                <th>Nom_entreprise</th>
-                                <th>Descrption</th>
-                                <th>Cours</th>
-                                <th>Volume</th>
+                                <th>Séance</th>
+                                <th>Nom de l'entreprise</th>
+                                <th>Valeur du cours</th>
+                                <th>Valeur du volume</th>
                                 
                             </tr>
                         </thead>
@@ -106,7 +104,6 @@ export default function Home(){
                                     <tr>
                                         <td>{item.seance_vf} </td>
                                         <td>{item.valeur}</td>
-                                        <td>{item.description} </td>
                                         <td>{item.cours_cloture} </td>
                                         <td>{item.volume} </td>
                                         
@@ -117,8 +114,16 @@ export default function Home(){
                         }
                     </table>
                     }
+                    
+                    
                     </div>
                 </div>
+            }
+            {(user.role=='user')&&(
+                <div className='body-image'>
+                </div>
+            )
+
             }
         </div>
             

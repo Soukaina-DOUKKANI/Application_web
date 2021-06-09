@@ -8,6 +8,7 @@ import {useForm} from "react-hook-form";
 import GrapheFct  from '../../Main.Administrateur/Fonctions/GrapheFct';
 import 'c3/c3.css';
 import {ExportToExcel} from '../../Main.Administrateur/ExportToExcel';
+import '../Procedures/interface.css';
 
 export default function Interface_utilisateur2({match}){
 
@@ -20,7 +21,7 @@ export default function Interface_utilisateur2({match}){
 
 
     useEffect(() => {  
-        Axios(setUser).get(`/Get_values_fct/${match.params.fct}`)
+        Axios(setUser).get(`/Get_function_user/${match.params.fct}`)
         .then(result => setData(result.data))
         .catch(err => console.log(err));  
         
@@ -37,7 +38,7 @@ export default function Interface_utilisateur2({match}){
     
      
     return (
-       <div className="container"> 
+        <div className="interface-user"> 
         <form  onSubmit={handleSubmit(onSubmit)}>
         <table className="table table-light" >  
 
@@ -63,23 +64,23 @@ export default function Interface_utilisateur2({match}){
                     if(key==='description'){
                         return(
                             <tr  className="row">
-                                <th>Description</th>
-                                <td  >{data[key]} </td>  
+                                <th className='col-md-2'>DESCRIPTION</th>
+                                <td className='col-sm-7' >{data[key]} </td>  
                             </tr>
                         )
                     }
                     if (key.charAt(0)==="@"){
                         return(
-                            <tr  className="row"  > 
-                                <th style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </th>  
-                               <td> <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} /> </td>
+                            <tr className="row"  > 
+                                <th className='col-md-2'>{data[key]} </th>  
+                               <td className='col-sm-7'> <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} /> </td>
                             </tr>)
                     } 
                     
                 })
             }
             <div className="div">
-                <button className="button" type="submit"> Executer</button> 
+                <button style={{'marginTop':'10px'}} className="btn btn-primary" type="submit"> Executer</button> 
             </div>
         </tbody>
           

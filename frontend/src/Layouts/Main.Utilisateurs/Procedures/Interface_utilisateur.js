@@ -8,6 +8,7 @@ import {useForm} from "react-hook-form";
 import Graphe  from '../../Main.Administrateur/Procedures/Graphe';
 import 'c3/c3.css';
 import {ExportToExcel} from '../../Main.Administrateur/ExportToExcel';
+import './interface.css';
 
 export default function Interface_utilisateur({match}){
 
@@ -20,7 +21,7 @@ export default function Interface_utilisateur({match}){
 
 
     useEffect(() => {  
-        Axios(setUser).get(`/Get_values/${match.params.proc}`)
+        Axios(setUser).get(`/Get_procedure_user/${match.params.proc}`)
         .then(result => setData(result.data))
         .catch(err => console.log(err));  
         
@@ -37,7 +38,7 @@ export default function Interface_utilisateur({match}){
     
      
     return (
-       <div className="container"> 
+        <div className="interface-user"> 
         <form  onSubmit={handleSubmit(onSubmit)}>
         <table className="table table-light" >  
 
@@ -61,29 +62,30 @@ export default function Interface_utilisateur({match}){
                     if(key=='description'){
                         return(
                             <tr  className="row">
-                                <th>Description</th>
-                                <td  >{data[key]} </td>  
+                                <th className='col-md-2'>DESCRIPTION</th>
+                                <td className='col-sm-7' >{data[key]} </td>  
                             </tr>
                         )
                     }
                     if (key.charAt(0)=="@"){
                         return(
                             <tr  className="row"  > 
-                                <th style={{ "marginLeft": "15px","marginRight": "10px"}}>{data[key]} </th>  
-                               <td> <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} /> </td>
+                                <th className='col-md-2'>{data[key]} </th>  
+                               <td className='col-sm-7'> <Parametre type={key} valeur={data['valeur']} requete={data['request']} register={register} setValue ={setValue} control={control} /> </td>
                             </tr>)
                     } 
                     
                 })
             }
             <div className="div">
-                <button className="button" type="submit"> Executer</button> 
+                <button style={{'marginTop':'10px'}} className="btn btn-primary" type="submit"> Executer</button> 
             </div>
         </tbody>
           
         </table>
 
         </form>
+        
          <div className="container" style= {{"marginTop": "30px "}}>
          <Graphe data={dataGraph} procedure={match.params.proc}  />
     </div>

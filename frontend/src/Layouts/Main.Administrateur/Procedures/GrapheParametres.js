@@ -15,14 +15,14 @@ export default function GrapheParametre({match}){
     const [data, setData]= useState({});
     const [graph, setGraph]= useState([]);
     const [chartData, setChartData]=useState({});
-    const [bdd, setBDD]=useState([])
+    const [bdd, setBDD]=useState([]);
+
     
         
     const onChartSubmit =(chartData)=>{
         Axios(setUser).post(`/setGraph/${match.params.proc}`, chartData)
         .then (result => {setChartData(result.data)
-                           console.log(chartData)
-                           console.log(result)})
+                           console.log(result.data)})
         .catch(err => console.log(err));  
     }
 
@@ -34,22 +34,42 @@ export default function GrapheParametre({match}){
     },[])
 
     const onSubmit =(df)=>{
-       
         Axios(setUser).post(`/set_procedure/`, df)
         .then (result => {
-            setGraph(result.data);
+            setGraph(result.data[0]);
         })
         .catch(err => console.log(err));  
     }
 
     useEffect(() => {  
         Axios(setUser).get(`/Get_values/${match.params.proc}`)
-        .then(result => setData(result.data))
+        .then(result => {
+            if(result.data.type=='procedure'){
+                setData(result.data.content)
+            }
+            else{
+                setGraph(corrigerGraphe(result.data.content))
+            }
+
+        })
         .catch(err => console.log(err));  
         
     }, []);
 
-   
+    const corrigerGraphe=(obj)=>{
+        Object.keys(obj).map(item=>{
+            if(item.indexOf('_visible' )>0){
+                if(obj[item]=='true'){
+                    obj[item]=true
+                }
+                else{
+                    obj[item]=false
+                }
+            }
+        })
+        return obj;
+    }
+
     const options=[
         {value:'null',label:'null'},
         {value:'line', label:'Line chart'},
@@ -71,12 +91,52 @@ export default function GrapheParametre({match}){
         {value:'y2',label:'y2'}
     ]
     
-    console.log('result',graph[0])
+    const traiterObj = (obj) => {
+        let tb_keys = [];
+        Object.keys(obj).map(key=>{
+          let key_ = key.split('_')[0];
+          if (!tb_keys.find((item) => { return item == key_})){
+            if(key_!='title'){
+                tb_keys.push(key_);
+
+            }
+          }
+        })
+    
+        return tb_keys;   
+     };
+    
+     const handleChange = e =>{
+        const {name, value }=e.target;
+        setGraph (prevUser => ({
+            ...prevUser,
+            [name] :value
+        }));
+
+    }
+
+    const handleChangeCheckbox = e =>{
+        const {name, checked }=e.target;
+        setGraph (prevUser => ({
+            ...prevUser,
+            [name] :checked
+        }));
+
+    }
+
+    
+
+      
+    const items=traiterObj(graph)
+    console.log('result',graph)
     console.log('data',data)
+    console.log('item',items)
+
+    
 
     return (
         <div className="graphe-param"> 
-        {(graph.length===0) &&
+        {(!Object.keys(graph).length) &&
          <form key={1} onSubmit={handleSubmit(onSubmit)}>
              <div  >
              { 
@@ -89,7 +149,7 @@ export default function GrapheParametre({match}){
                              <h2 > {data[key]}  </h2>
                              <input type="hidden" value= {match.params.proc} name="nameProc" ref={register}/>
                              </div> 
-                             )
+                             ) 
                      }
                     if(key=='bdd'){
                          return(
@@ -113,35 +173,35 @@ export default function GrapheParametre({match}){
          </div>
          </form>
         }
-        {graph.length>0 && (
-             
+        {(Object.keys(graph).length>0)  && (
+
             <form key={2} onSubmit={handleSubmit2(onChartSubmit)} >
                 <h2>Paramétrage du graphe</h2>
                 <table className=" table table2 table-bordered " > 
                 
                 <tr className="form-group" >
                         <th>Titre</th>
-                        <td colspan='4'>
-                            <input className='form-control' name='title' autoComplete='off' placeholder='Nom du graphe' ref={register2}/>
+                        <td colSpan='4'>
+                            <input className='form-control' onChange={handleChange} name='title' autoComplete='off' value={graph['title']} placeholder='Nom du graphe' ref={register2}/>
                         </td>
                 </tr> 
                     
-                {Object.keys(graph[0]).map(key =>{
+                {traiterObj(graph).map(key =>{
                     return(
                     
                     <tr className='form-group' >
                        <th>{key}</th>
                        <td >
-                        <input style={{'marginLeft':'1px', 'marginRight':'1px'}} className="  form-check-input" type="checkbox"  name={key+'_visible'}  ref={register2}  />
+                        <input style={{'marginLeft':'1px', 'marginRight':'1px'}} onChange={handleChangeCheckbox} className="  form-check-input" type="checkbox"  name={key+'_visible'} value={graph[key+'_visible']} defaultChecked={graph[key+'_visible']} ref={register2}  />
                         <label style={{'marginLeft':'10px'}} className='col-md-2'>Visible</label>
 
                        </td> 
                        
                        <td>
-                           <input className='form-control' autoComplete='off' placeholder='Label' name={key+'_label'}  ref={register2} />
+                           <input className='form-control' onChange={handleChange} autoComplete='off' placeholder='Label' name={key+'_label'} value={graph[key+'_label']} ref={register2} />
                        </td>
                        <td>
-                            <select className='form-control'  name ={key + '_chart'} ref={register2}>
+                            <select className='form-control' onChange={handleChange} name ={key + '_chart'} value={graph[key+'_chart']} ref={register2}>
                                 {options.map(item =>{
                                 return (
                                         <option value={item.value}>{item.value}</option>
@@ -153,7 +213,7 @@ export default function GrapheParametre({match}){
                        
                        
                        <td>
-                            <select  className='form-control' name={key+'_axe'} ref={register2}>
+                            <select  className='form-control' onChange={handleChange} name={key+'_axe'} value={graph[key+'_axe']} ref={register2}>
                                 {values.map(item =>{
                                 return (
                                         <option value={item.value}>{item.value}</option>

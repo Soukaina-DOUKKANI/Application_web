@@ -1,6 +1,7 @@
 import React from 'react'
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export const ExportToExcel = ({ apiData, fileName }) => {
   const fileType =
@@ -16,6 +17,6 @@ export const ExportToExcel = ({ apiData, fileName }) => {
   };
 
   return (
-    <button onClick={(e) => exportToCSV(apiData, fileName)}>Exporter les données Excel</button>
+    <button className='btn btn-success' onClick={(e) => exportToCSV(apiData, fileName)}>Exporter les données  Excel</button>
   );
 };

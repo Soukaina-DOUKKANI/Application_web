@@ -88,3 +88,12 @@
   height: 35px;
 
 }
+
+.loupe{
+  width:20px
+}
+
+.loupe-btn{
+  background-color: #fff;
+  border:none;
+}

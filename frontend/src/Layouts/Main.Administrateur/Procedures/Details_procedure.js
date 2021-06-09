@@ -33,7 +33,7 @@ export default function Details_procedures({match}){
         <div >
                
         <form   className="container" onSubmit={handleSubmit(onSubmit)}> 
-        <h2   > Métadonnées de la  procédure {data.SP_NAME} </h2>
+        <h2  style={{'marginTop': '10px', 'marginBottom':'20px'}} > Métadonnées de la  procédure {data.SP_NAME} </h2>
 
         <table className="table table-bordered" >  
         
@@ -76,16 +76,16 @@ export default function Details_procedures({match}){
                    <td >
                        {data.parameters.map(item =>{
                            if (item.DATA_TYPE==='date'){
-                            return (
-                                <div className='parameter-border'>
-                                    <p className='row'> 
-                                        <label className="col-md-2" >{item.PARAMETER_NAME}</label>
-                                        <input  className='form-control col-sm-9' name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>
-                                    </p>
-                                </div>
-                                     
-                            );}
-                            else {
+                                return (
+                                    <div className='parameter-border'>
+                                        <p className='row'> 
+                                            <label className="col-md-2" >{item.PARAMETER_NAME}</label>
+                                            <input  className='form-control col-sm-9' name={item.PARAMETER_NAME} autoComplete="off"  type="text" placeholder="Renommer" ref={register}/>
+                                        </p>
+                                    </div>
+                                );
+                            }
+                            if (item.DATA_TYPE==='varchar') {
                                 return(
                                 <div className='parameter-border'>
                                     <p className='row' >
@@ -104,6 +104,8 @@ export default function Details_procedures({match}){
                                 </div>
                                 );
                             }
+                            
+
                        })}</td>
                 </tr>
             </tbody>

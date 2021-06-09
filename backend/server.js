@@ -31,7 +31,7 @@ client.ping({}, { requestTimeout: 20000 }, (err, response) => {
 app.post('/searchBar', function(req,res){
     const search=req.body.search
     client.search({
-        index: ['metadonnees','tables4'],
+        index: ['metadonnees','historique_valeurs'],
         body:{
             query: {
                 multi_match: {
@@ -90,7 +90,7 @@ sql.connect(config, function (err) {
 
 
 
-// Enregistrement des comptes Utilisateurs
+// Creation des comptes des Utilisateurs
 app.post('/users', function(req,res){
     const request= new sql.Request();
     const id=req.body.id;
@@ -184,7 +184,7 @@ app.post('/connexion', function (req,res) {
                                 const id=result.recordset[0].ID;
                                 const role=result.recordset[0].role;
                                 const values={id,role}
-                                const token= jwt.sign(values, "jwtSecret", {expiresIn: 60*60*4})
+                                const token= jwt.sign(values, "jwtSecret", {expiresIn: 60*60*12})
                                 res.json( { auth: true, token:token , response: {id, role}})
 
                             }
@@ -206,7 +206,7 @@ app.post('/connexion', function (req,res) {
 });
 
 
-//verifyJWT middleware
+//verifyJWT middleware verification du token
 
 const verifyJwt = (req,res,next) =>{
     const token = req.headers.authorization;
@@ -233,7 +233,7 @@ const verifyJwt = (req,res,next) =>{
 
 }
 
-// use middleware verifyJwt
+// use middleware verifyJwt 
 app.use(verifyJwt)
 
 //Validate connexion
@@ -274,11 +274,13 @@ app.get('/checkIdentifiant/:identifiant/:id', function (req,res){
     })
 })
 
+
+
 //search bar elasticsearch 
 app.post('/search', function(req,res){
     const search=req.body.search
     client.search({
-        index: ['metadonnees','tables4'],
+        index: ['metadonnees','historique_valeurs'],
         body:{
             query: {
                 multi_match: {
@@ -458,11 +460,12 @@ app.get('/appFonction/:baseDD', function(req,res){
                         // afficher le resultat de la procedure 
                         else{
                             
-                            const proc=JSON.parse(results.recordset[0].F);
                             const values=[]
-                            proc.map(item=>{
-                                values.push({'F':item})               
-                            })
+                            const val=JSON.parse(results.recordset[0].F)
+                            for (let i in val){
+                                values.push({'F':val[i].value})
+                            }
+
                             res.send(values)
             
                         }
@@ -547,14 +550,17 @@ app.get('/allData/:baseDD', function (req, res) {
                                 const proc=JSON.parse(results.recordset[0].P);
                                 const fct=JSON.parse(resultats.recordset[0].F)
                                 const values=[]
-                                proc.map(item=>{
-                                    values.push({'P':item})               
-                                })
-
-                                fct.map(item=>{
-                                    values.push({'F':item})
-                                })
+                                
+                                for (let i in proc){
+                                    values.push({'P':proc[i].value})
+                                }
+                                for (let i in fct){
+                                    values.push({'F':fct[i].value})
+                                }
+                                  
                                 res.send(values)
+
+                                
                 
                             }
                         });
@@ -576,7 +582,6 @@ app.get('/appProcedure/:baseDD', function (req, res) {
         const role=req.roleUser;
         const id= req.userId;
         const bdd=req.params.baseDD;
-
        // liste des  procedures stockees
         if(role=='admin'){
             request.query(`use ${bdd}`, function(err,results){
@@ -612,13 +617,15 @@ app.get('/appProcedure/:baseDD', function (req, res) {
 
                         // afficher le resultat de la procedure 
                         else{
-                            
-                            const proc=JSON.parse(results.recordset[0].P);
                             const values=[]
-                            proc.map(item=>{
-                                values.push({'P':item})               
-                            })
+                            const val=JSON.parse(results.recordset[0].P)
+                            for (let i in val){
+                                values.push({'P':val[i].value})
+                            }
+
                             res.send(values)
+
+                            
 
                         }
                     });
@@ -834,7 +841,6 @@ app.get ('/Get_options/:requete/:bdd', function(req, res){
     const statement=['update','insert','delete','drop','truncate','create','alter','backup']
     const split=requete.split(' ')
     for (let val in statement){
-        console.log(statement[val])
         if(split[0].toLowerCase()=== statement[val]){
             res.send('request not allowed')
         }
@@ -861,49 +867,136 @@ app.get ('/Get_options/:requete/:bdd', function(req, res){
     })
     
 })
-//affichage interface user graphe parametres procedure
+//affichage  graphe parametres procedure admin interface
 app.get('/Get_values/:proc', function (req,res){
     const request= new sql.Request();
     var proc =req.params.proc;
+
     request.query(`use APP_WEB_DATA`, function(err,results){
         if(err){console.log(err)}
         else{
-            request.query(`select procedureData  from Parametrage_Interface_Utilisateur
-                            where procedureName like '${proc}' ` , function(err,values){
-                if (err){
-                    console.log(err);
-                    }
+            request.query(`select dataGraph  from Parametrage_Graphe
+            where procedureName like '${proc}'`, function(err,results){
+                if(err){console.log(err)}
                 else{
-                    const result= JSON.parse(values.recordset[0].procedureData)
-                    res.send(result);
+                    if(results.recordset.length>0  )  {
+                        const resultat={}
+                        const result=JSON.parse(results.recordset[0].dataGraph)
+                        resultat.type='graphe'
+                        resultat.content=result
+                        res.send(resultat)
                     }
-            });
+                    else{
+                        request.query(`select procedureData  from Parametrage_Interface_Utilisateur
+                            where procedureName like '${proc}' ` , function(err,values){
+                            if (err){
+                                console.log(err);
+                                }
+                            else{
+                                const resultat={}
+                                const result= JSON.parse(values.recordset[0].procedureData)
+                                resultat.type='procedure'
+                                resultat.content=result
+                                res.send(resultat);
+                                }
+                        });
+
+                    }
+                }
+            })
+            
         }
     })
     
 })
 
-//affichage interface user graphe parametres function
+//affichage  graphe parametres function Admin interface
 app.get('/Get_values_fct/:fct', function (req,res){
     const request= new sql.Request();
     var fct =req.params.fct;
     request.query(`use APP_WEB_DATA`, function(err,results){
         if(err){console.log(err)}
         else{
-            request.query(`select functionData  from Parametrage_Interface_Utilisateur
-                            where functionName like '${fct}' ` , function(err,values){
-                if (err){
-                    console.log(err);
-                    }
+            request.query(`select dataGraphFct  from Parametrage_Graphe
+            where functionName like '${fct}'`, function(err,results){
+                if(err){console.log(err)}
                 else{
-                    const result= JSON.parse(values.recordset[0].functionData)
-                    res.send(result);
+                    if(results.recordset.length>0)  {
+                        const resultat={}
+                        const result=JSON.parse(results.recordset[0].dataGraphFct)
+                        resultat.type='graphe'
+                        resultat.content=result
+                        res.send(resultat)
                     }
-            });
+                    else{
+                        request.query(`select functionData  from Parametrage_Interface_Utilisateur
+                            where functionName like '${fct}' ` , function(err,values){
+                            if (err){
+                                console.log(err);
+                                }
+                            else{
+                                const resultat={}
+                                const result= JSON.parse(values.recordset[0].functionData)
+                                resultat.type='fonction'
+                                resultat.content=result
+                                res.send(resultat);
+                                }
+                        });
+
+                    }
+                }
+            })
+            
         }
     })
 })
 
+
+//AFFICHAGE PARAMATRAGE PROCEDURE INTERFACE UTILISATEUR
+app.get('/Get_procedure_user/:proc', function (req,res){
+    const request= new sql.Request();
+    var proc =req.params.proc;
+
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select procedureData  from Parametrage_Interface_Utilisateur
+                            where procedureName like '${proc}' ` , function(err,values){
+                if (err){
+                    console.log(err);}
+                else{
+                    const result= JSON.parse(values.recordset[0].procedureData)
+                    res.send(result)
+                }
+            
+            })
+        }
+    
+    })
+})
+
+//AFFICHAGE PARAMATRAGE FONCTION INTERFACE UTILISATEUR
+app.get('/Get_function_user/:fct', function (req,res){
+    const request= new sql.Request();
+    var fct =req.params.fct;
+
+    request.query(`use APP_WEB_DATA`, function(err,results){
+        if(err){console.log(err)}
+        else{
+            request.query(`select functionData  from Parametrage_Interface_Utilisateur
+                           where functionName like '${fct}' ` , function(err,values){
+                if (err){
+                    console.log(err);}
+                else{
+                    const result= JSON.parse(values.recordset[0].functionData)
+                    res.send(result)
+                }
+            
+            })
+        }
+    
+    })
+})
 
 
 
@@ -1140,6 +1233,7 @@ app.get('/getGraphFct/:name',function(req,res){
         }
     })
 })
+
 
 
 //ajouter une procedure

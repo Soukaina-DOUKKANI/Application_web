@@ -20,8 +20,6 @@ export default function List_procedures(){
     const [baseDD, setBaseDD]=useState('APP_WEB_DATA');
     
 
-    
-
     useEffect(()=>{
         Axios(setUser).get('/BDD')
         .then (result =>setBDD(result.data))
@@ -63,8 +61,8 @@ export default function List_procedures(){
     const handleChange2=(e)=>{
         setFct(e.target.checked)
     }
-   
     
+        
     
     return(
         <div>
@@ -91,10 +89,10 @@ export default function List_procedures(){
                 
                 <div >
                 <div className="form-group row">
-                    <div className='col-md-3'>
+                    <div className='col-md-2'>
                         <label  for="bdd">Base de données  </label>
                     </div>
-                    <div className="col-sm-5">
+                    <div className="col-sm-6">
                         <select className="form-control"  name = 'bdd'  onChange={onChangeBDD}>
                             {bdd.map(item =>{
                                 return (
@@ -124,7 +122,7 @@ export default function List_procedures(){
                     <div className="list-group">
                     <input id="auto" 
                             type="text"
-                            placeholder="chercher une procédure....."
+                            placeholder="Chercher une procédure....."
                             onClick={()=> setDisplay(!display)}
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}/>
@@ -133,6 +131,7 @@ export default function List_procedures(){
                             <div  className="list-group" >
                             {data
                             .filter(({P})=>P.toLowerCase().indexOf(search.toLowerCase())>-1)
+                            .sort((a, b) => a.P> b.P? 1 : -1)
                             .map(item =>{
                                 if(user.role=='admin'){
                                     return (
@@ -166,7 +165,7 @@ export default function List_procedures(){
                 <div className="list-group">
                     <input   id="auto" 
                             type="text"
-                            placeholder="chercher une fonction....."
+                            placeholder="Chercher une fonction....."
                             onClick={()=> setDisplay(!display)}
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}/>
@@ -175,6 +174,7 @@ export default function List_procedures(){
                             <div  className="list-group" >
                             {dataFct
                             .filter(({F})=>F.toLowerCase().indexOf(search.toLowerCase())>-1)
+                            .sort((a, b) => a.F> b.F? 1 : -1)
                             .map(item =>{
                                 if(user.role=='admin'){
                                     return (
@@ -209,7 +209,7 @@ export default function List_procedures(){
                     <div className="list-group">
                         <input  id="auto" 
                             type="text"
-                            placeholder="chercher....."
+                            placeholder="Chercher....."
                             onClick={()=> setDisplay(!display)}
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}/>

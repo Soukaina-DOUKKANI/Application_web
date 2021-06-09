@@ -13,7 +13,8 @@ export default function Details_fonction({match}){
 
   
     useEffect(() => {  
-        Axios(setUser).get(`/page_fct/${match.params.name}/${match.params.baseDD}`).then(result => setData(result.data))
+        Axios(setUser).get(`/page_fct/${match.params.name}/${match.params.baseDD}`)
+        .then(result => setData(result.data))
         .catch(err => console.log(err));  
           
     }, []); 
@@ -31,7 +32,7 @@ export default function Details_fonction({match}){
         <div >
             
         <form   className="container" onSubmit={handleSubmit(onSubmit)}> 
-        <h2  > Métadonnées de la  fonction {data.SP_NAME} </h2>
+        <h2 style={{'marginTop': '10px', 'marginBottom':'20px'}} > Métadonnées de la  fonction {data.SP_NAME} </h2>
 
         <table className="table table-bordered" >  
         
@@ -84,7 +85,7 @@ export default function Details_fonction({match}){
                                     </div>
                                      
                             );}
-                            else {
+                            if (item.DATA_TYPE==='varchar') {
                                 return(
                                     <div className='parameter-border'>
                                         <p className='row' >

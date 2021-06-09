@@ -50,10 +50,10 @@ export default function AjoutFonction(){
             <form  onSubmit={handleSubmit(onSubmit)}>
                 <div  className='form-group row'>
                 <div className='col-md-2'>
-                <label  for='namefct'>Fonction table </label>
+                <label  for='namefct'>Nom Fonction  </label>
                 </div>
                 <div className="col-sm-9">
-                <input  autoComplete='off' type="text" className=" content form-control" id="namefct" name='name'  placeholder="Nom de la fonction table" ref={register}/>
+                <input  autoComplete='off' type="text" className=" content form-control" id="namefct" name='name'  placeholder="Insérer le nom de la fonction " ref={register}/>
                </div>
                </div> 
 
@@ -77,7 +77,7 @@ export default function AjoutFonction(){
                     <label  for='proc' > Requête SQL </label>
                     </div>
                     <div className='col-sm-9'>
-                    <textarea autoComplete='off' type="text" className="form-control" id="proc" name='fonction' placeholder="Code SQL " ref={register}></textarea>
+                    <textarea autoComplete='off' type="text" className="form-control" id="proc" name='fonction' placeholder="Insérer la requête " ref={register}></textarea>
                     </div>
                 </div>
 

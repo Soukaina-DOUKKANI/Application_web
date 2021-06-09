@@ -8,7 +8,6 @@ import 'bootstrap/dist/css/bootstrap.min.css' ;
 export default function Lister_utilisateurs(){
 
     const [listUser, setListUser]=useState([]);
-    const [procedure, setProcedure]=useState([]);
     const [user,setUser]=useContext(LoginContext);
 
     useEffect(() => {
@@ -16,24 +15,19 @@ export default function Lister_utilisateurs(){
         .then(result => setListUser(result.data))
         .catch(err=> console.log(err))
     },[])
-
-    useEffect(() => {
-        Axios(setUser).get('/List_procedures')
-        .then(result => setProcedure(result.data))
-        .catch(err=> console.log(err))
-    },[])
     
     
    
+    
     return(
-        <div style={{'marginTop':'30px'}} className="container ">
+        <div style={{'marginTop':'30px'}} className=" div3  ">
             <div className='row'>
-            <h2>Membres</h2> 
+            <h2 style={{'marginLeft':'10px'}}>Membres</h2> 
             <Link to={`/Utilisateurs`}>
                 <button style={{'marginLeft':'30px'}} type="button" class="btn btn-primary"> Ajouter un membre</button>
             </Link>
             </div>
-            <table className="table table-bordered " style={{'marginTop':'30px'}}>
+            <table className="table table-bordered " style={{'marginTop':'30px', 'width': '90%'}}>
                 <thead>
                     <tr>
                         <th>Nom utilisateur</th>
@@ -54,9 +48,9 @@ export default function Lister_utilisateurs(){
                                                 Editer
                                             </button>
                                     </Link>
-                                    <button style={{'marginLeft':'15px'}} className='btn btn-danger'>Supprimer</button>
+                                    
                                     </td>
-                                        
+                                    
                                    
                                     
                                 </tr>    

@@ -52,7 +52,7 @@ export default function AjoutProcedure(){
                     <label  for="nameproc"> Nom Procédure </label>
                 </div>
                 <div className="col-sm-9">
-                    <input autoComplete='off' type="text" className="form-control" id="nameproc" name='name'  placeholder="insérer un nom" ref={register}/>
+                    <input autoComplete='off' type="text" className="form-control" id="nameproc" name='name'  placeholder="Insérer le nom de la procédure " ref={register}/>
                 </div>
                 </div>
                 <div className="form-group row">
@@ -75,11 +75,11 @@ export default function AjoutProcedure(){
                 <div class="form-group row">
                 <div className='col-md-2'>
 
-                    <label for="proc">Code SQL</label>
+                    <label for="proc">Requête SQL</label>
                     </div>
                 <div className="col-sm-9">
 
-                    <textarea autoComplete='off' type="text" className="form-control" id="proc" name='procedure' placeholder="insérer la requête SQL" ref={register}></textarea>
+                    <textarea autoComplete='off' type="text" className="form-control" id="proc" name='procedure' placeholder="Insérer la requête " ref={register}></textarea>
                 </div>
                 </div>
         

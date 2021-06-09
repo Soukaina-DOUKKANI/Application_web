@@ -11,10 +11,8 @@ export default function App(){
          
         <div>
             <Router >
-               
-            <Header/>
-            <AppRoutes/>
-               
+                <Header/>
+                <AppRoutes/>
             </Router>
         </div>
         )
