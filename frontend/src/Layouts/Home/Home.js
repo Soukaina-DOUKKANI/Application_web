@@ -1,7 +1,7 @@
 import React, { useState ,  useContext } from 'react'  
 import Axios from '../../Authentification/AxiosInstance';  
-import 'bootstrap/dist/css/bootstrap.min.css' 
-import {Link} from "react-router-dom"
+import 'bootstrap/dist/css/bootstrap.min.css'; 
+import {Link} from "react-router-dom";
 import {LoginContext} from '../../Authentification/LoginContext';
 import {useForm} from 'react-hook-form';
 import "./Home.procedures.css";

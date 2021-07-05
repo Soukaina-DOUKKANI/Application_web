@@ -206,7 +206,6 @@ export default function Utilisateurs({match}){
                             defaultValue=""
                             placeholder='Selectionner'
                             options={options(procedure)}
-                            rules={{required:true}}
                             isMulti
                             isClearable
                             isSearchable
@@ -226,7 +225,6 @@ export default function Utilisateurs({match}){
                             defaultValue=""
                             placeholder='Selectionner'
                             options={options2(fonction)}
-                            rules={{required:true}}
                             isMulti
                             isClearable
                             isSearchable

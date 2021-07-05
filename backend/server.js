@@ -65,7 +65,7 @@ app.post('/searchBar', function(req,res){
 })
 
 // run react in production 
-//app.use(express.static(path.join(__dirname, './build')));
+app.use(express.static(path.join(__dirname, './build')));
 
 // configuration de  SQL SERVER 
 var config = {
